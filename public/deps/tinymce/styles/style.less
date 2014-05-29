@@ -1,0 +1,250 @@
+i:not(.initial-load), .article-buttons a {
+    margin:2px;
+}
+.attention {
+    display:none;
+    position:absolute;
+    top:0;
+    left:42%;
+    margin:0 auto;
+    padding-left:4%;
+    padding-right:4%;
+    background-color:yellow;
+    color:black;
+    z-index:99999!important;
+    text-align:center;
+}
+textarea {
+    width: 100%;
+    min-height: 300px;
+    margin-bottom: 20px;
+    padding: 5px;
+}
+.github-cover {
+    display:none;
+    background:grey;
+    position:fixed;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    padding:0;
+    margin:0;
+    background-size:100%;
+    opacity:.95;
+    z-index:500!important;
+}
+.github-progress {
+    display:none;
+    position:fixed;
+    left:20%;
+    right:20%;
+    top:35%;
+    z-index:9998!important;
+}
+.progress-bar-message {
+    width:100%;
+    text-align:center;
+    position:relative;
+    margin: 0 auto;
+    left:0;
+    right:0;
+    top:50px;
+    color: #fff;
+    font-size:2em;
+    display:none;
+    z-index:9998!important;
+}
+.article-list li, .panel li {
+  list-style-type: none;
+
+  &:hover:not(.list-home) {
+    color: blue;
+    cursor: pointer;
+  }
+}
+.article-buttons {
+  display: none;
+  margin-left: 20px;
+}
+.file:hover {
+  .article-buttons {
+    display: inline-block;
+    margin: -10px 0;
+  }
+}
+.folder:hover {
+  .article-buttons {
+    display: inline-block;
+    margin: -10px 0;
+  }
+}
+.list-home ~ .article-list {
+  display: block;
+
+  .article-list {
+    display: none;
+  }
+}
+.z-index-fix {
+  z-index:-1;
+}
+.panel li a {
+  background:none;
+  border:none;
+  outline:none;
+  border-style:none;
+  font:inherit;
+  padding:0px;
+  margin:0px;
+  text-decoration:none;
+  font-weight:bold;
+  color:#005580;
+}
+.panel form {
+  margin:0px;
+  padding:0px;
+}
+.panel a:hover {
+  text-decoration:underline;
+}
+.panel li:not(.not-a-link) i {
+  color:#005580;
+}
+.panel li:hover, label:hover {
+  color:black!important;
+  cursor:default!important;
+}
+.dl-horizontal dd {
+  padding-top:11px;
+}
+.editable:hover, input[contenteditable=true]:hover {
+  cursor:pointer;
+}
+/* repeated in html 
+because css isn't loaded
+in the head */
+#save-article-form {
+  display:none;
+}
+
+
+
+.extras-accordian {
+  margin-top: 20px;
+
+  .panel-heading {
+    padding: 0;
+
+    .panel-title {
+      a {
+        display: inline-block;
+        width: 100%;
+      }
+    }
+
+    a {
+      padding: 10px 15px;
+    }
+
+    &:hover {
+      background-color: #333;
+      color: #FFF;
+
+      a {
+        &:hover {
+          color: #FFF;
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}
+
+
+// Files uploader =======================
+#holder {
+  h2 {
+    text-align: center;
+    color: #999;
+  }
+}
+
+#file_uploader {
+  min-height: 50px;
+}
+
+#holder { border: 5px dashed #ccc; width: 100%; min-height: 100px; margin: 20px 0; }
+#holder.hover { border: 10px dashed #0c0; }
+#holder img { display: block; margin: 10px auto; }
+#holder p { margin: 10px; font-size: 14px; }
+.fail { background: #c00; padding: 2px; color: #fff; }
+.hidden { display: none !important;}
+
+// File uploads
+.panel {
+  #file-list {
+    .file {
+      &:hover {
+        .article-buttons {
+          display: inline-block;
+        }
+      }
+    }
+    a {
+      color: #FFF;
+      font-size: 12px;
+      padding: 1px 5px;
+      background-color: #D9534F;
+      border-color: #D43F3A;
+      &:hover {
+        text-decoration: none;
+        background-color: #D2322D;
+        border-color: #AC2925;
+      }
+    }
+  }
+}
+
+
+// EDITOR =======================
+.heading-separater {
+  background-color: #333;
+  color: #EEE;
+  padding: 5px;
+}
+
+
+
+
+
+#loginlogout {
+  .btn {
+    margin-top: 2px;
+  }
+  form {
+    margin-top: 1px;
+  }
+}
+
+
+.list-home {
+  margin-top: 20px;
+}
+
+.article-list {
+  padding-left: 20px;
+}
+
+
+.article-headers {
+  input {
+    display: block;
+  }
+}
+
+
+
+
+// Get styles from pineneedles
+@import "../../../pineneedles/contents/assets/css/theme.less";
