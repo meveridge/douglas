@@ -82,7 +82,10 @@
 @section('pageContent')
     @parent
     <div class="col-md-10">
-    {{ print_r($selectedArticle) }}
+    	@if (isset($selectedArticle))
+    		<input type='hidden' id='currentPath' value='{{ $selectedArticle->path }}' />
+    		{{ print_r($selectedArticle) }}
+		@endif
 	</div>
 @stop
 
@@ -101,9 +104,20 @@
     			}else{
     				$("#navigationTree li[parentId*='"+parentId+"']").addClass("collapse");
     				$(this).removeClass(openIcon).addClass(closedIcon);
+    				//$("#navigationTree li[parentId*='"+parentId+"']").each()
     			}
 
     		});
+
+			@if (isset($selectedArticle))
+			$("#{{ $selectedArticle->id }}").click();
+			var parentId = $("#{{ $selectedArticle->id }}").parent().attr("parentId");
+			while ( parentId != "0"){
+				$("#"+parentId).click();
+				parentId = $("#"+parentId).parent().attr("parentId");
+			}
+			@endif
+
 		});
 
     </script>
