@@ -71,11 +71,13 @@ class articleController extends \BaseController {
 		{
 			$title = Input::get('inputArticleTitle');
 			$path = Input::get('inputArticlePath');
+			$dataLevel = Input::get('inputArticleDataLevel');
 
 			$articleId = $this->createArticleRecord(
 				array(
 					'title'=>$title,
 					'path'=>$path,
+					'data_level'=>$dataLevel,
 				)
 			);
 

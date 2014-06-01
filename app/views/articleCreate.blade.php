@@ -20,6 +20,10 @@
 					<label for="inputArticlePath">Path</label>
 					<input type="text" class="form-control" id="inputArticlePath" name="inputArticlePath" placeholder="Article Path">
 				</div>
+				<div class="form-group">
+					<label for="inputArticleDataLevel">Data Level</label>
+					<input type="text" class="form-control" id="inputArticleDataLevel" name="inputArticleDataLevel" placeholder="Article DataLevel">
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
