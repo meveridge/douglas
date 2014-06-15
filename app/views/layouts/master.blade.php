@@ -8,57 +8,9 @@
 		<meta name="author" content="">
 		<title>{{ $pageTitle }}</title>
 		<!-- Bootstrap core CSS -->
-		<link href="http://localhost/douglas/public/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-		<style>
-			html {
-				position: relative;
-				min-height: 100%;
-			}
-			body {
-				padding-top: 50px;
-				/* Margin bottom by footer height */
-				margin-bottom: 60px;
-			}
-			#footer {
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-				/* Set the fixed height of the footer here */
-				height: 60px;
-				background-color: #f5f5f5;
-			}
-			#pageErrorAlert,#pageMessageAlert{
-				position: absolute;
-				top:60px;
-				left:50%;
-				z-index:3;
-				padding:20px;
-			}
-
-			ul #navigationTree {
-	            list-style-type: none;
-	            padding-left: 0;
-	            overflow-x:auto;
-	            white-space: nowrap;
-            }
-            .navTreeSpan{
-	            cursor:pointer;
-	        }
-
-            .glyphicon {
-                font-size: 0.7em;
-                margin-left: 5px;
-                color: #1774E6;
-
-	        a:hover{
-	            position:absolute;
-	            background-color: #f2f1f0;
-	            border: 1px solid #ddd;
-    	    }
-
-	        
-
-		</style>
+		{{ HTML::style('deps/bootstrap/css/bootstrap.min.css'); }}
+		{{ HTML::style('css/main.css'); }}
+		{{ HTML::style('css/sidebar.css'); }}
 	</head>
 	@section('navbar')
 		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -79,7 +31,7 @@
 						<li class="dropdown {{ isset($activeLink) && $activeLink == "article" ? 'active' : '' }}">
 							<a href="" class="dropdown-toggle" data-toggle="dropdown">Articles <b class="caret"></b></a>
 							<ul class="dropdown-menu">
-								<li><a href="http://localhost/douglas/public/article">View</a></li>
+								<li><a href="http://localhost/douglas/public/article/index/web">View</a></li>
 								<li><a href="http://localhost/douglas/public/article/create">New</a></li>
 								<li><a href="#">Copy</a></li>
 								<li><a href="#">Move</a></li>
@@ -123,6 +75,7 @@
 		<div id="footer">
 			<div class="container">
 				<p class="text-muted">Douglas by Mark Everidge</p>
+				<span id="pageFooterSpinner" class="glyphicon glyphicon-repeat spin hidden"></span>
 			</div>
 		</div>
 	@show
@@ -131,20 +84,11 @@
 	    <!-- Bootstrap core JavaScript
 	    ================================================== -->
 	    <!-- Placed at the end of the document so the pages load faster -->
-	    <script src="http://localhost/douglas/public/jquery/jquery-2.1.1.min.js"></script>
-	    <script src="http://localhost/douglas/public/bootstrap/js/bootstrap.min.js"></script>
-
-		<script>
-			$(document)
-	    		.ready(function() {
-	    			$("#pageErrorAlert").fadeOut(3600, function() {
-	    				// Animation complete.
-	  				});
-	  				$("#pageMessageAlert").fadeOut(3600, function() {
-	    				// Animation complete.
-	  				});
-	  			});
-  		</script>
+	    {{ HTML::script('deps/jquery/jquery-2.1.1.min.js'); }}
+	    {{ HTML::script('deps/bootstrap/js/bootstrap.min.js'); }}
+	    {{ HTML::script('deps/underscore/underscore-1.6.0.min.js'); }}
+	    {{ HTML::script('deps/backbone/backbone-1.1.2.min.js'); }}
+	    {{ HTML::script('js/main.js'); }}
 
     @show
 

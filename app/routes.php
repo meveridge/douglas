@@ -16,25 +16,10 @@ Route::get('/', function()
 	return View::make('weclome')->with('pageTitle', 'SugarCRM Douglas');;
 });
 
-//Test Only:
-/*
-Route::get('/article', function()
-{
-    return View::make('weclome', array(
-    	'pageTitle' => 'SugarCRM Douglas',
-    	'activeLink' => 'article',
-    	)
-    );
-});
-*/
-//Route::resource('article','articleController');
-//Route::get('/article/path={path}', 'articleController@'
+//Route::get('article/index/{base}/{currentPath}/{dataLevel}', array('as' => 'getIndex', 'uses' => 'articleController@getIndex'));
 
 
-//Working:
-/*
-Route::get('/article/editArticle/{slashData?}','articleController@editArticle')->where('slashData', '(.*)');
-*/
+
 Route::controller('article', 'articleController');
 Route::controller('user', 'userController');
 Route::resource('template', 'templateController');

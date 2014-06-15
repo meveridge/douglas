@@ -5,57 +5,133 @@ class articleController extends \BaseController {
 	public $masterDir = "";
 
 	/**
-	 * Display a listing of the resource.
+	 * Display a listing of the resource
+	 * and render the article index view
 	 *
-	 * @return Response
+	 * @param JSON $articleRecords
+	 * @return render articleIndex view
 	 */
-	public function index()
+	public function index($articleRecords)
 	{
-		return 'other index...';
+		return View::make('articleIndex', array(
+	    	'pageTitle' => 'SugarCRM Douglas -- Article Index',
+	    	'activeLink' => 'article',
+	    	'articleRecords' => $articleRecords,
+	    	)
+	    );
 	}
 
 	/**
 	 * Get Method for the Index
-	 * Return list of articles from db
+	 * Return list of articles from db to JSON
 	 *
-	 * @return Response
+	 * @param string base 
+	 * @return $articleRecords or Render View
 	 */
-	public function getIndex()
+	public function getIndex($base)
 	{
 
+		$currentPath = Input::get('currentPath');
+		$dataLevel = Input::get('dataLevel');
+
+		if(!isset($base)) $base = null;
+		if(!isset($currentPath)) $currentPath = "/";
+		if(!isset($dataLevel)) $dataLevel = "2";
+
+		$translatedPath = str_replace("|", "/", $currentPath) . "%";
 		$articleRecords = DB::table('articles')
-			//->orderBy('data_level', 'asc')
+			->where('path', 'like', $translatedPath)
+			->where('data_level', $dataLevel)
 			->orderBy('path', 'asc')
 			->get();
 
+		if($base=="web"){
+			return $this->index($articleRecords);
+		}else{
+			//return $articleRecords;
+			//var_dump($articleRecords);
+			return Response::json(array(
+        		'error' => false,
+        		'articleRecords' => $articleRecords),
+        		200
+    		);
+		}
+		
+	}
+
+	/**
+	 * Get Method for the Index
+	 * Return list of articles from db to JSON
+	 *
+	 * @param string base 
+	 * @return $articleRecords or Render View
+	 */
+	public function postIndex()
+	{
+		$name = Input::get('name');
+		echo"Base = $base : Path = $currentPath : Data Level = $dataLevel";
+		$translatedPath = str_replace("|", "/", $currentPath) . "%";
+		$articleRecords = DB::table('articles')
+			->where('path', 'like', $translatedPath)
+			->where('data_level', $dataLevel)
+			->orderBy('path', 'asc')
+			->get();
+
+		if($base=="web"){
+			return $this->index($articleRecords);
+		}else{
+			//return $articleRecords;
+			//var_dump($articleRecords);
+			return Response::json(array(
+        		'error' => false,
+        		'articleRecords' => $articleRecords),
+        		200
+    		);
+		}
+		
+	}
+
+	/**
+	 * Display from to edit the article
+	 * and render the article index view
+	 *
+	 * @param JSON $selectedArticle
+	 * @return render articleIndex view
+	 */
+	public function edit($selectedArticle)
+	{
 		return View::make('articleIndex', array(
 	    	'pageTitle' => 'SugarCRM Douglas -- Article Index',
 	    	'activeLink' => 'article',
-	    	'articleRecords' => $articleRecords,
+	    	'selectedArticle' => $selectedArticle,
 	    	)
 	    );
 	}
 
 	/**
-	 * Display a listing of the resource.
+	 * Get Method for editing an articlde
+	 * Return JSON data result of edit
 	 *
 	 * @return Response
 	 */
-	public function getEdit($id)
+	public function getEdit($id,$base = null)
 	{
-		$articleRecords = DB::table('articles')
-			//->orderBy('data_level', 'asc')
-			->orderBy('path', 'asc')
-			->get();
-		$selectedArticle = DB::table('articles')->where('id', $id)->first();
+		$selectedArticle = DB::table('articles')
+			->where('id', $id)
+			->first();
 
-		return View::make('articleIndex', array(
-	    	'pageTitle' => 'SugarCRM Douglas -- Article Index',
-	    	'activeLink' => 'article',
-	    	'articleRecords' => $articleRecords,
-	    	'selectedArticle' => $selectedArticle,
-	    	)
-	    );
+		if($base=="web"){
+			return $this->edit($selectedArticle);
+		}else{
+			//return $selectedArticle;
+			//var_dump($selectedArticle);
+			return Response::json(array(
+        		'error' => false,
+        		'selectedArticle' => $selectedArticle),
+        		200
+    		);
+		}
+		
 	}
 
 	/**

@@ -17,7 +17,7 @@ CREATE TABLE `douglas`.`articles` (
   `date_entered` datetime DEFAULT NULL,
   `date_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=78305 DEFAULT CHARSET=latin1$$
+) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=latin1$$
 
 
 delimiter $$
