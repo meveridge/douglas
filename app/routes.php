@@ -37,3 +37,4 @@ Route::get('/article/editArticle/{slashData?}','articleController@editArticle')-
 */
 Route::controller('article', 'articleController');
 Route::controller('user', 'userController');
+Route::resource('template', 'templateController');
