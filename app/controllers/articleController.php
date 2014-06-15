@@ -71,18 +71,39 @@ class articleController extends \BaseController {
 		{
 			$title = Input::get('inputArticleTitle');
 			$path = Input::get('inputArticlePath');
-			$dataLevel = Input::get('inputArticleDataLevel');
 
-			$articleId = $this->createArticleRecord(
-				array(
-					'title'=>$title,
-					'path'=>$path,
-					'data_level'=>$dataLevel,
-				)
-			);
+			//automatically determines data_level of file based on path
+			$dataLevel = 1 + substr_count($path, "/");
+
+			//parses path and creates any directories in the path that do not yet exist
+			$levels = explode("/", $path);
+			$pathos = "";
+			$alert = "";
+			foreach ($levels as $key=>$value) {
+				if ($value != "") {
+					$pathos .= "/" . $value;
+				}
+    			$dLevel = $key + 1;
+    			$articleSubPath = DB::table('articles')
+    				->where('path',$pathos)
+    				->get();
+    			if ($articleSubPath == NULL) { 
+    				$articleId = $this->createArticleRecord(
+						array(
+							'title'=>$value,
+							'path'=>$pathos,
+							'data_level'=>$dLevel,
+						)
+					);
+					if($articleId){
+						$alert .= 'Article Ids '.$articleId.' created.' . '<br />';
+					}
+    			}
+    			//$alert .= " " . $value;
+			}
 
 			if($articleId){
-				return Redirect::to('article')->with('message', 'Article Id '.$articleId.' created.');
+				return Redirect::to('article')->with('message', $alert);
 			}else{
 				return Redirect::to('article')->with('error', 'Article Failed to create.');
 			}
