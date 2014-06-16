@@ -2,15 +2,15 @@ $(document)
 	.ready(function() {
 		$("#pageErrorAlert").fadeOut(3600, function() {
 			// Animation complete.
-			});
-			$("#pageMessageAlert").fadeOut(3600, function() {
-			// Animation complete.
-			});
-			$('[data-toggle=sideBar]').click(function () {
-          $('.sidebar').toggleClass('active');
-          $('.sideBarButton').toggleClass('active');
-        });
 		});
+		$("#pageMessageAlert").fadeOut(3600, function() {
+		// Animation complete.
+		});
+		$('[data-toggle=sideBar]').click(function () {
+			$('.sidebar').toggleClass('active');
+          	$('.sideBarButton').toggleClass('active');
+        });
+	});
 
 var AppMain = Backbone.Model.extend({
 	

@@ -19,7 +19,7 @@
 
 
     <button type="button" class="btn btn-primary btn-xs sideBarButton" data-toggle="sideBar"><span class="glyphicon {{$closedIcon}}"></span></button>
-    <div class="sidebar tree">
+    <div id="articleTree" class="sidebar tree">
       <h1><small>SugarCRM Support</small></h1>
     		@foreach ($articleRecords as $article)
                 <?php $safePath = str_replace("/", "_", $article->path); ?>
@@ -35,7 +35,7 @@
 
 @section('pageContent')
     @parent
-    <div class="col-md-10">
+    <div id="articleContent" class="col-md-10">
     	@if (isset($selectedArticle))
     		<input type='hidden' id='currentPath' value='{{ $selectedArticle->path }}' />
     		{{ print_r($selectedArticle) }}
@@ -46,9 +46,11 @@
 @section('pageJSLoad')
     @parent
     <script>
+    /*
         function registerTreeBranchToggle(){
 
             $(".treeBranchToggle").click(douglas.clickEvent());
+            */
 /*
             $(".treeBranchToggle").click(function(){
 
@@ -63,10 +65,11 @@
                 }
             })
 */
-        }
+/*        }
     	$(document).ready(function(){
             registerTreeBranchToggle();
 		});
-
+*/
     </script>
+    {{ HTML::script('deps/tinymce/tinymce.min.js'); }}
 @stop

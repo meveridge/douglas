@@ -46,12 +46,21 @@
 
 	@section('pageAlerts')
 		<!-- Master Page Messages -->
-		@if(Session::has('error'))
-		<p class="bg-danger" id="pageErrorAlert">{{ $error = Session::get('error'); }}</p>
-		@endif
-		@if(Session::has('message'))
-		<p class="bg-success" id="pageMessageAlert">{{ $message = Session::get('message'); }}</p>
-		@endif
+		
+		
+		<div class="pageAlerts">
+			<!-- Used in Backbone -->
+			<p class="hidden" id="pageAlert"></p>
+
+			<!-- Legacy... Used on page load. TODO: Reqork to backbone and remove -->
+			@if(Session::has('error'))
+			<p class="bg-danger" id="pageErrorAlert">{{ $error = Session::get('error'); }}</p>
+			@endif
+			@if(Session::has('message'))
+			<p class="bg-success" id="pageMessageAlert">{{ $message = Session::get('message'); }}</p>
+			@endif
+
+		</div>
 		
 		
 	@show
@@ -73,9 +82,15 @@
 	@section('pageFooter')
 		<!-- Page Footer -->
 		<div id="footer">
-			<div class="container">
-				<p class="text-muted">Douglas by Mark Everidge</p>
-				<span id="pageFooterSpinner" class="glyphicon glyphicon-repeat spin hidden"></span>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-4 text-muted">Douglas for SugarCRM</div>
+					<div class="col-md-7 text-muted"></div>
+					<div class="col-md-1 text-muted waitIndicator pull-right">
+						<span id="pageFooterWaitText" class="small hidden"></span>
+						<span id="pageFooterWaitIcon" class="glyphicon spin hidden"></span>
+					</div>
+				</div>
 			</div>
 		</div>
 	@show
@@ -88,7 +103,7 @@
 	    {{ HTML::script('deps/bootstrap/js/bootstrap.min.js'); }}
 	    {{ HTML::script('deps/underscore/underscore-1.6.0.min.js'); }}
 	    {{ HTML::script('deps/backbone/backbone-1.1.2.min.js'); }}
-	    {{ HTML::script('js/main.js'); }}
+	    {{ HTML::script('js/main_bb.js'); }}
 
     @show
 
