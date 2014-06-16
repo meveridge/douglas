@@ -10,3 +10,8 @@ Install YAML
 =======
 
 pecl install yaml
+
+Install Horde Text Diff
+=======
+http://www.horde.org/libraries/Horde_Text_Diff/download
+More Work to be done here.
