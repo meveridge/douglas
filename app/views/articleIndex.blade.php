@@ -17,11 +17,13 @@
     <input type="hidden" id= "closedIcon" value="{{ $closedIcon }}" />
     <input type="hidden" id= "openIcon" value="{{ $openIcon }}" />
 
-
+    <div id="sideBar">
     <button type="button" class="btn btn-primary btn-xs sideBarButton" data-toggle="sideBar"><span class="glyphicon {{$closedIcon}}"></span></button>
     <div id="articleTree" class="sidebar tree">
-      <h1><small>SugarCRM Support</small></h1>
-    		@foreach ($articleRecords as $article)
+      <div id="articleTreeHeader"><h1><small>SugarCRM Support</small></h1></div>
+      <div id="articleTreeContent">
+    		<!--
+            @foreach ($articleRecords as $article)
                 <?php $safePath = str_replace("/", "_", $article->path); ?>
     			<div>
                     <span class="glyphicon {{$closedIcon}} treeBranchToggle" data-toggle="collapse" data-target="#{{$safePath}}" path="{{$article->path}}" data-level="{{$article->data_level}}"></span>
@@ -29,6 +31,8 @@
                 </div>
                 <div id="{{$safePath}}" class="collapse"></div>
     		@endforeach
+            -->
+    </div>
     </div>
 
 @stop

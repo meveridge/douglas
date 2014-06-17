@@ -83,7 +83,7 @@ ArticleTree = (function(Backbone, $){
 	return Backbone.Model.extend({
 
         initialize: function(){
-        	douglas.artliceList = new ArticleCollection();
+        	douglas.articleList = new ArticleCollection();
         },
         getChildren: function(path,data_level){
 	    	douglas.showWait();
@@ -104,7 +104,7 @@ ArticleTree = (function(Backbone, $){
 						safePath: safePath,
 						data_level: article.data_level,
 					});
-					douglas.artliceList.add(currArticle);
+					douglas.articleList.add(currArticle);
 				});
 				douglas.hideWait();
 				return data;
@@ -170,10 +170,11 @@ WaitView = (function(Backbone, $){
 ArticleTreeView = (function(Backbone, $){
 	return Backbone.View.extend({
 
-		el: "#articleTree",
+		el: "#sideBar",
 	    initialize: function(){
 	    	//Get Root Elements from DB
 	    	//douglas.artliceList = new ArticleCollection();
+	    	//douglas.articleTree.getChildren("/","2");
 		},
 	    render: function(){
 
@@ -188,9 +189,9 @@ ArticleTreeView = (function(Backbone, $){
 
 			//Using JS and JQuery
 			resultHTML = "";
-			var mainDiv = document.createElement('div');
+			var mainDiv = document.createElement('span');
 			
-			$.each(douglas.artliceList.toJSON(),function(index,article){
+			$.each(douglas.articleList.toJSON(),function(index,article){
 				var safePath = article.path;
 				safePath = safePath.replace(new RegExp("/", 'g'), "_");
 				
@@ -216,38 +217,18 @@ ArticleTreeView = (function(Backbone, $){
                 mainDiv.appendChild(outerDiv);
                 mainDiv.appendChild(innerDiv);
 			});
-			this.$el.html(mainDiv);
+			$("#articleTreeContent").html(mainDiv);
 
 	        return this;
 	    },
-	    getChildren2: function(){
-			resultHTML = "";
-			$.each(data.articleRecords,function(index,article){
-				var safePath = article.path;
-				safePath = safePath.replace(new RegExp("/", 'g'), "_");
-				
-				var outerDiv = document.createElement('div');
+	    events: {
+            "click [data-toggle=sideBar]": "toggleTree"
+        },
+	    toggleTree: function(){
+	    	this.render();
+			$('.sidebar').toggleClass('active');
+			$('.sideBarButton').toggleClass('active');
 
-				var treeIcon = document.createElement('span');
-				treeIcon.className = "glyphicon "+douglas.closedIcon+" treeBranchToggle";
-				treeIcon.setAttribute('data-toggle', 'collapse');
-				treeIcon.setAttribute('data-target', '#'+safePath);
-				treeIcon.setAttribute('data-level', article.data_level);
-				treeIcon.setAttribute('path', article.path);
-				treeIcon.setAttribute('click','douglas.clickEvent()');
-				
-				outerDiv.appendChild(treeIcon);
-
-				var titleText = document.createTextNode(article.title);
-				outerDiv.appendChild(titleText);
-
-                var innerDiv = document.createElement('div');
-                innerDiv.setAttribute('id', safePath);
-                innerDiv.className = "collapse";
-
-                $("#"+parentSafePath).append(outerDiv);
-                $("#"+parentSafePath).append(innerDiv);
-			});
 	    }
 	});
 })(Backbone, jQuery);
@@ -266,6 +247,8 @@ $(function(){
 	});
 	douglas.waitIndicator = new WaitView();
 	douglas.articleTree = new ArticleTree();
+	douglas.articleTree.getChildren("/","2");
+
 	douglas.articleTreeView = new ArticleTreeView();
 
 });
