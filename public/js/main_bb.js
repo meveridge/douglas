@@ -13,11 +13,18 @@ AppMain = (function(Backbone, $){
         public_path: "http://localhost/douglas/public/",
 		
 		//Tree Open and Closed Icons
-		closedIcon: "glyphicon-chevron-right",
-		openIcon: "glyphicon-chevron-down",
+		
+		//octicon
+		//closedIcon: "octicon octicon-chevron-right",
+		//openIcon: "octicon octicon-chevron-down",
+
+		//glyphicon
+		closedIcon: "glyphicon glyphicon-chevron-right",
+		openIcon: "glyphicon glyphicon-chevron-down",
 		
 		//Wait Indicator
-		waitIcon: "glyphicon-repeat",
+		waitIcon: "octicon octicon-gear",
+		//waitIcon: "glyphicon glyphicon-repeat",
 		waitText: "Loading...",
 		showWait: function(){
 			this.waitIndicator.activate();
@@ -280,7 +287,7 @@ ArticleTreeView = (function(Backbone, $){
 				var outerDiv = document.createElement('div');
 
 				var treeIcon = document.createElement('span');
-				treeIcon.className = "glyphicon "+douglas.closedIcon+" treeBranchToggle";
+				treeIcon.className = douglas.closedIcon+" treeBranchToggle";
 				treeIcon.setAttribute('data-toggle', 'collapse');
 				treeIcon.setAttribute('data-target', '#'+safePath);
 				treeIcon.setAttribute('data-level', article.data_level);
