@@ -7,7 +7,7 @@ AppMain = (function(Backbone, $){
 	return Backbone.Model.extend({
 
 		initialize: function(){
-			console.log("Initialize DOuglas.");
+			console.log("Initialize Douglas.");
         },
 		
 		//Tree Open and Closed Icons
@@ -33,20 +33,24 @@ AppMain = (function(Backbone, $){
 			this.message.message = message;
 		},
 
-		//SideBar
-		//Add SideBar
-		//Toggle SideBar
+		sanitizePath: function(path){
+			var safePath = path.replace(new RegExp("/", 'g'), "_");
+			safePath = safePath.replace(new RegExp("'", 'g'), "_");
+			return safePath;
+		},
 
-		//Tree
-		//Open Branch
-		//Load Branch
+		//SideBar
+		addTreeSideBar: function(){
+			//Needs work... throws JS errors if not on Article
+			douglas.articleTreeView.render();
+		},
+		toggleTree: function(){
+			douglas.articleTreeView.toggleTree();
+		},
 
 		//User Preferences
 		//Load User Preferences
 		//Save User Preferences
-		age: function () {
-				return (new Date() - this.get('dob'))
-		},
 	});
 })(Backbone, jQuery);
 
@@ -83,11 +87,13 @@ ArticleTree = (function(Backbone, $){
 	return Backbone.Model.extend({
 
         initialize: function(){
-        	douglas.articleList = new ArticleCollection();
+        	//douglas.articleList = new ArticleCollection();
         },
         getChildren: function(path,data_level){
+        	douglas.articleList = new ArticleCollection();
 	    	douglas.showWait();
-			var parentSafePath = path.replace(new RegExp("/", 'g'), "_");
+			//var parentSafePath = path.replace(new RegExp("/", 'g'), "_");
+			var parentSafePath = douglas.sanitizePath(path);
 			$.ajax({
 				type: "GET",
 				url: "article/index/AJAX",
@@ -96,7 +102,8 @@ ArticleTree = (function(Backbone, $){
 			.done(function( data ) {
 				$.each(data.articleRecords,function(index,article){
 					var safePath = article.path;
-					safePath = safePath.replace(new RegExp("/", 'g'), "_");
+					//safePath = safePath.replace(new RegExp("/", 'g'), "_");
+					safePath = douglas.sanitizePath(safePath);
 					var currArticle = new Article({ 
 						id: article.id,
 						title: article.title,
@@ -106,6 +113,7 @@ ArticleTree = (function(Backbone, $){
 					});
 					douglas.articleList.add(currArticle);
 				});
+				douglas.articleTreeView.render(path);
 				douglas.hideWait();
 				return data;
 			});
@@ -172,11 +180,10 @@ ArticleTreeView = (function(Backbone, $){
 
 		el: "#sideBar",
 	    initialize: function(){
-	    	//Get Root Elements from DB
-	    	//douglas.artliceList = new ArticleCollection();
-	    	//douglas.articleTree.getChildren("/","2");
+	    	douglas.articleTree.getChildren("/","2");
+	    	this.render("/");
 		},
-	    render: function(){
+	    render: function(parentBranch){
 
 	    	/* //Using Templates
 	    	var templateSrc = "<% _.each(articleList, function(article) { %><tr><td><%= article.title %></td><td><%= article.safePath %></td><td><%= article.data_level %></td></tr><% }); %>";
@@ -193,7 +200,8 @@ ArticleTreeView = (function(Backbone, $){
 			
 			$.each(douglas.articleList.toJSON(),function(index,article){
 				var safePath = article.path;
-				safePath = safePath.replace(new RegExp("/", 'g'), "_");
+				safePath = douglas.sanitizePath(safePath);
+				//safePath = safePath.replace(new RegExp("/", 'g'), "_");
 				
 				var outerDiv = document.createElement('div');
 
@@ -203,7 +211,7 @@ ArticleTreeView = (function(Backbone, $){
 				treeIcon.setAttribute('data-target', '#'+safePath);
 				treeIcon.setAttribute('data-level', article.data_level);
 				treeIcon.setAttribute('path', article.path);
-				treeIcon.setAttribute('click','douglas.clickEvent()');
+				treeIcon.setAttribute('onClick','douglas.articleTreeView.toggleBranch(\"'+article.path+'\",\"'+article.data_level+'\")');
 				
 				outerDiv.appendChild(treeIcon);
 
@@ -217,7 +225,25 @@ ArticleTreeView = (function(Backbone, $){
                 mainDiv.appendChild(outerDiv);
                 mainDiv.appendChild(innerDiv);
 			});
-			$("#articleTreeContent").html(mainDiv);
+			
+			if(parentBranch == "/"){
+				$("#articleTreeContent").html(mainDiv);	
+			}else{
+				var safePathParent = parentBranch;
+				safePathParent = douglas.sanitizePath(safePathParent);
+
+				var clickedIcon = $("span[data-target=#"+safePathParent+"]");
+
+				if(clickedIcon.hasClass(douglas.closedIcon)){
+				    clickedIcon.removeClass(douglas.closedIcon).addClass(douglas.openIcon);
+				}else{
+				    clickedIcon.removeClass(douglas.openIcon).addClass(douglas.closedIcon);
+				}
+
+				//safePathParent = safePathParent.replace(new RegExp("/", 'g'), "_");
+				$("#"+safePathParent).html(mainDiv);
+			}
+			
 
 	        return this;
 	    },
@@ -225,10 +251,20 @@ ArticleTreeView = (function(Backbone, $){
             "click [data-toggle=sideBar]": "toggleTree"
         },
 	    toggleTree: function(){
-	    	this.render();
+	    	//console.log("Toggle Tree for root.");
+	    	//douglas.articleTree.getChildren("/","2");
+	    	//this.render("/");
 			$('.sidebar').toggleClass('active');
 			$('.sideBarButton').toggleClass('active');
 
+	    },
+	    toggleBranch: function(branch,level){
+	    	level = parseInt(level)+1;
+	    	console.log("Toggle Tree Branch:"+branch+", level:"+level);
+	    	var safePath = douglas.sanitizePath(branch);
+	    	douglas.articleTree.getChildren(branch,level);
+	    	//console.log(douglas.articleList);
+	    	//this.render(branch);
 	    }
 	});
 })(Backbone, jQuery);
@@ -247,7 +283,6 @@ $(function(){
 	});
 	douglas.waitIndicator = new WaitView();
 	douglas.articleTree = new ArticleTree();
-	douglas.articleTree.getChildren("/","2");
 
 	douglas.articleTreeView = new ArticleTreeView();
 
