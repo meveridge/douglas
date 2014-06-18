@@ -9,6 +9,7 @@
 		<title>{{ $pageTitle }}</title>
 		<!-- Bootstrap core CSS -->
 		{{ HTML::style('deps/bootstrap/css/bootstrap.min.css'); }}
+		{{ HTML::style('deps/octicons/octicons.css'); }}
 		{{ HTML::style('css/main.css'); }}
 		{{ HTML::style('css/sidebar.css'); }}
 	</head>
