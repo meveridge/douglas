@@ -12,6 +12,9 @@
 		{{ HTML::style('css/main.css'); }}
 		{{ HTML::style('css/sidebar.css'); }}
 	</head>
+	<body>
+	<div class="container">
+
 	@section('navbar')
 		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 			<div class="container">
@@ -65,11 +68,12 @@
 		
 	@show
 
-	<div class="container-fluid">
+	
 	<div class="row">
 	
 	@section('pageSidebar')
 		<!-- Master Page SideBar -->
+		<div class="col-md-1"></div>
 	@show
 
 	@section('pageContent')
@@ -106,6 +110,6 @@
 	    {{ HTML::script('js/main_bb.js'); }}
 
     @show
-
+  </div>
   </body>
 </html>

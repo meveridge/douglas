@@ -9,6 +9,8 @@ AppMain = (function(Backbone, $){
 		initialize: function(){
 			console.log("Initialize Douglas.");
         },
+
+        public_path: "http://localhost/douglas/public/",
 		
 		//Tree Open and Closed Icons
 		closedIcon: "glyphicon-chevron-right",
@@ -48,6 +50,59 @@ AppMain = (function(Backbone, $){
 			douglas.articleTreeView.toggleTree();
 		},
 
+		initializeTinyMCE: function(){
+			tinymce.init({
+			    selector: "div.editable",
+			    theme: "modern",
+			    plugins: [
+			        ["advlist autolink link pineimage lists charmap print preview hr anchor pagebreak spellchecker"],
+			        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
+			        ["save table contextmenu directionality emoticons template paste textcolor pinelink pinecode"]
+			    ],
+			    contextmenu: "link pinelink image | inserttable | cell row column deletetable",
+			    style_formats_merge: true,
+			    add_unload_trigger: false,
+			    schema: "html5",
+			    inline: true,
+			    toolbar1: "undo redo | styleselect | pinecode | bold underline italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image ",
+			    toolbar2: "forecolor backcolor | print preview media",
+			    statusbar: true,
+			    image_list: [],
+			    convert_urls: false,
+			    browser_spellcheck : true,
+			    setup : function(ed) {
+			        ed.on('KeyDown',function(e) {
+			            if (e.keyCode == 9 && !e.altKey && !e.ctrlKey){
+			                if (e.shiftKey){
+			                    tinyMCE.activeEditor.editorCommands.execCommand("outdent");
+			                }else{
+			                    tinyMCE.activeEditor.editorCommands.execCommand("indent");
+			                }
+			                return tinymce.dom.Event.cancel(e); 
+			            }else if (e.keyCode == 9 && !e.ctrlKey && e.altKey && !e.shiftKey){
+			                tinyMCE.activeEditor.editorCommands.execCommand('mceInsertContent', false, "&nbsp;&nbsp;&nbsp;");
+			                return tinymce.dom.Event.cancel(e); 
+			            }
+			            
+			        });
+			    },
+			    setup : function(ed) {
+			        ed.on('BeforeSetContent',function(e) {
+			            if(e.initial === true){
+			            }else{
+			                e.content = e.content.replace(/    /g,"&nbsp;&nbsp;&nbsp;&nbsp;");
+			                e.content = e.content.replace(/   /g,"&nbsp;&nbsp;&nbsp;");
+			                e.content = e.content.replace(/  /g,"&nbsp;&nbsp;");
+			            }
+			        });
+			    },
+			    paste_preprocess : function(pl, o) {
+			            //alert(o.content);
+			            //o.content = o.content.replace(/\>\s+\</g,"&nbsp;");
+			    }
+			});
+		},
+
 		//User Preferences
 		//Load User Preferences
 		//Save User Preferences
@@ -80,6 +135,25 @@ Article = (function(Backbone, $){
         },
         setContent: function(){
         },
+        loadArticle: function(){
+        	$.ajax({
+				type: "GET",
+				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX"
+			})
+			.done(function( data ) {
+				$.each(data.selectedArticle,function(index,article){
+					//start here...
+					console.log(article);
+					var safePath = douglas.sanitizePath(article.path);
+					this.id = article.id;
+					this.title = article.title;
+					this.path = article.path;
+					this.safePath = safePath;
+					this.data_level = article.data_level;
+				});
+				return data;
+			});
+        },
 	});
 })(Backbone, jQuery);
 
@@ -96,7 +170,7 @@ ArticleTree = (function(Backbone, $){
 			var parentSafePath = douglas.sanitizePath(path);
 			$.ajax({
 				type: "GET",
-				url: "article/index/AJAX",
+				url: douglas.public_path+"article/index/AJAX",
 				data: { currentPath: path, dataLevel: data_level }
 			})
 			.done(function( data ) {
@@ -285,5 +359,7 @@ $(function(){
 	douglas.articleTree = new ArticleTree();
 
 	douglas.articleTreeView = new ArticleTreeView();
+
+	douglas.initializeTinyMCE();
 
 });

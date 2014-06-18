@@ -100,10 +100,13 @@ class articleController extends \BaseController {
 	 */
 	public function edit($selectedArticle)
 	{
+		//echo"Article ID: $selectedArticle->id";
+		$articleContent = $this->getContent($selectedArticle->id);
 		return View::make('articleIndex', array(
 	    	'pageTitle' => 'SugarCRM Douglas -- Article Index',
 	    	'activeLink' => 'article',
 	    	'selectedArticle' => $selectedArticle,
+	    	'articleContent' => $articleContent,
 	    	)
 	    );
 	}
@@ -114,8 +117,10 @@ class articleController extends \BaseController {
 	 *
 	 * @return Response
 	 */
-	public function getEdit($id,$base = null)
+	public function getEdit($id)
 	{
+		$base = Input::get('base');
+
 		$selectedArticle = DB::table('articles')
 			->where('id', $id)
 			->first();
@@ -132,6 +137,45 @@ class articleController extends \BaseController {
     		);
 		}
 		
+	}
+
+	/**
+	 * Get Method for retrieving an article's content
+	 * Return JSON data
+	 *
+	 * @return Response
+	 */
+	public function getContent($id)
+	{
+		$base = Input::get('base');
+
+		$articleContents = DB::table('article_content')
+			->select('article_content.content_id')
+			->where('article_id', $id)
+			->orderBy('ordinal', 'asc')
+			->get();
+
+		$articleHTML = "";
+
+		foreach($articleContents as $index=>$contentRecord){
+			$articleContents = DB::table('content')
+				->where('id', $contentRecord->content_id)
+				->first();
+			$articleHTML .= $articleContents->html;
+		}
+		if($base=="web"){
+			return array(
+				"contentData"=>$articleContents,
+				"html"=>$articleHTML
+			);
+		}else{
+			return Response::json(array(
+	    		'error' => false,
+	    		'articleContents' => $articleContents,
+				'html' => $articleHTML),
+	    		200
+			);
+		}
 	}
 
 	/**
@@ -164,7 +208,7 @@ class articleController extends \BaseController {
 	}
 
 	/**
-	 * Show the form for creating a new resource.
+	 * Create article db record
 	 *
 	 * @return Response
 	 */
@@ -176,6 +220,32 @@ class articleController extends \BaseController {
 
 	    $articleId = DB::table('articles')->insertGetId($data);
 		return $articleId;
+	}
+
+	/**
+	 * Create article content db record
+	 *
+	 * @return Response
+	 */
+	public function createArticleContentRecord($data = array())
+	{
+		$date = new \DateTime;
+		$data['date_entered'] = $date;
+		$data['date_modified'] = $date;
+
+		$contentData['date_entered'] = $data['date_entered'];
+		$contentData['date_entered'] = $data['date_modified'];
+		$contentData['html'] = $data['html'];
+
+		$contentId = DB::table('content')->insertGetId($contentData);
+
+		$articleContentData['ordinal'] = $data['ordinal'];
+		$articleContentData['article_id'] = $data['article_id'];
+		$articleContentData['content_id'] = $contentId;
+
+	    $articleContentId = DB::table('article_content')->insertGetId($articleContentData);
+
+		return $contentId;
 	}
 
 	/**
@@ -384,6 +454,13 @@ class articleController extends \BaseController {
 										
 									}
 								}
+
+								//Store Article Content
+								$newArticleContentData['article_id'] = $articleId;
+								$newArticleContentData['html'] = $contentString;
+								$newArticleContentData['ordinal'] = "1";
+								$articleContentId = $this->createArticleContentRecord($newArticleContentData);
+
 								if($articleId) echo"Article id : $articleId created<br>";
 							}else{
 								echo "<hr>Error parsing article metadata. Skipping... <br>";

@@ -5,6 +5,7 @@
 	position: absolute;
 	left: 0px;
 	top: 70px;
+	z-index:1000;
 	-webkit-transition: all .25s ease-out;
 	   -moz-transition: all .25s ease-out;
 	        transition: all .25s ease-out;
