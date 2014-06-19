@@ -11,15 +11,16 @@
 |
 */
 
-Route::get('/', function()
-{
-	return View::make('weclome')->with('pageTitle', 'SugarCRM Douglas');;
-});
 
 //Route::get('article/index/{base}/{currentPath}/{dataLevel}', array('as' => 'getIndex', 'uses' => 'articleController@getIndex'));
 
 
 
 Route::controller('article', 'articleController');
-Route::controller('user', 'userController');
+Route::controller('users', 'usersController');
 Route::resource('template', 'templateController');
+
+Route::get('/', function()
+{
+	return View::make('weclome')->with('pageTitle', 'SugarCRM Douglas');
+});
