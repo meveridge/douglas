@@ -130,9 +130,12 @@ class articleController extends \BaseController {
 		}else{
 			//return $selectedArticle;
 			//var_dump($selectedArticle);
-			return Response::json(array(
-        		'error' => false,
-        		'selectedArticle' => $selectedArticle),
+
+			return Response::json(
+				array(
+        			'error' => false,
+        			'selectedArticle' => $selectedArticle,
+        		),
         		200
     		);
 		}
@@ -214,12 +217,14 @@ class articleController extends \BaseController {
 	 */
 	public function createArticleRecord($data = array())
 	{
-		$date = new \DateTime;
-		$data['date_entered'] = $date;
-		$data['date_modified'] = $date;
-
-	    $articleId = DB::table('articles')->insertGetId($data);
-		return $articleId;
+		//$date = new \DateTime;
+		//$data['date_entered'] = $date;
+		//$data['date_modified'] = $date;
+		
+		$article = Article::create($data);
+	    
+	    //$articleId = DB::table('articles')->insertGetId($data);
+		return $article->id;
 	}
 
 	/**
@@ -233,11 +238,12 @@ class articleController extends \BaseController {
 		$data['date_entered'] = $date;
 		$data['date_modified'] = $date;
 
-		$contentData['date_entered'] = $data['date_entered'];
-		$contentData['date_entered'] = $data['date_modified'];
+		//$contentData['date_entered'] = $data['date_entered'];
+		//$contentData['date_modified'] = $data['date_modified'];
 		$contentData['html'] = $data['html'];
 
 		$contentId = DB::table('content')->insertGetId($contentData);
+
 
 		$articleContentData['ordinal'] = $data['ordinal'];
 		$articleContentData['article_id'] = $data['article_id'];
@@ -394,6 +400,12 @@ class articleController extends \BaseController {
 		        			//Found an article! Load it!
 		        			$articleString = file_get_contents($dir . $file);
 		        			$articleArray = explode("---\n\n",$articleString);
+
+		        			// explode failed to separate the article from the yaml
+            				// try again with windows line endings...
+		        			if(count($articleArray) == 1){
+		        				$articleArray = explode("---\r\n\r\n",$articleString);
+		        			}
 							
 							(isset($articleArray['0']) ? $headerString = trim($articleArray['0']) : $headerString = "");
 		        			(isset($articleArray['1']) ? $contentString = trim($articleArray['1']) : $contentString = "");
@@ -402,8 +414,8 @@ class articleController extends \BaseController {
 		        			try{
 		        				(($headerString!=="") ? $parsedMetaData = yaml_parse($headerString) : $parsedMetaData = "");
 		        			} catch (Exception $e) {
-    							echo '<hr>Caught exception: ',  $e->getMessage(), "\n";
-			    				echo "filename: $dir . $file <hr>";
+    							echo '<hr>Caught exception on YAML: ',  $e->getMessage(), "\n";
+			    				echo "filename: $dir . $file <br> $headerString<hr>";
     							$parsedMetaData = "";
 							}
 
@@ -417,17 +429,18 @@ class articleController extends \BaseController {
 
 		        				//Previous MetaData, now stored on article record
 		        				if(isset($parsedMetaData['title'])) $newArticleData['title'] = $parsedMetaData['title'];
-		        				if(isset($parsedMetaData['template'])) $newArticleData['template'] = $parsedMetaData['template'];
-		        				if(isset($parsedMetaData['css'])) $newArticleData['css'] = $parsedMetaData['css'];
-		        				if(isset($parsedMetaData['bodyclass'])) $newArticleData['bodyclass'] = $parsedMetaData['bodyclass'];
-		        				if(isset($parsedMetaData['widgets'])) $newArticleData['widgets'] = $parsedMetaData['widgets'];
-		        				if(isset($parsedMetaData['dateModified'])) $newArticleData['date_modified'] = $parsedMetaData['dateModified'];
+		        				//if(isset($parsedMetaData['template'])) $newArticleData['template'] = $parsedMetaData['template'];
+		        				//if(isset($parsedMetaData['css'])) $newArticleData['css'] = $parsedMetaData['css'];
+		        				//if(isset($parsedMetaData['bodyclass'])) $newArticleData['bodyclass'] = $parsedMetaData['bodyclass'];
+		        				//if(isset($parsedMetaData['widgets'])) $newArticleData['widgets'] = $parsedMetaData['widgets'];
+		        				//if(isset($parsedMetaData['dateModified'])) $newArticleData['date_modified'] = $parsedMetaData['dateModified'];
 			        			
 			        			//Create Article Record
 			        			try{
 		        					$articleId = $this->createArticleRecord($newArticleData);
 			        			} catch (Exception $e) {
-	    							echo '<hr>Caught exception: ',  $e->getMessage(), "\n";
+	    							echo '<hr>Caught exception on Create Article: ';
+	    							print_r($e);
 			    					echo "filename: $dir . $file <hr>";
 	    							$articleId = false;
 								}
@@ -446,7 +459,7 @@ class articleController extends \BaseController {
 												$articleId
 											);
 					        			} catch (Exception $e) {
-			    							echo '<hr>Caught exception: ',  $e->getMessage(), "\n";
+			    							echo '<hr>Caught exception on Metadata Create: ',  $e->getMessage(), "\n";
 			    							echo "filename: $dir . $file <hr>";
 			    							$metaId = "";
 										}

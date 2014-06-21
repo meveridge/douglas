@@ -78,3 +78,19 @@ Route::filter('csrf', function()
 		throw new Illuminate\Session\TokenMismatchException;
 	}
 });
+
+// This filter checks if a user is already logged in. If they are, it redirects them.
+Route::filter('guest', function()
+{
+        if (Auth::check())
+                return Redirect::route('/')
+                        ->with('flash_notice', 'You are already logged in!');
+});
+
+//This filter will return a user to the login screen if they are logged out
+Route::filter('auth', function()
+{
+        if (Auth::guest())
+                return Redirect::route('login')
+                        ->with('flash_error', 'You must be logged in to view this page!');
+});
