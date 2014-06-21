@@ -130,9 +130,12 @@ class articleController extends \BaseController {
 		}else{
 			//return $selectedArticle;
 			//var_dump($selectedArticle);
-			return Response::json(array(
-        		'error' => false,
-        		'selectedArticle' => $selectedArticle),
+
+			return Response::json(
+				array(
+        			'error' => false,
+        			'selectedArticle' => $selectedArticle,
+        		),
         		200
     		);
 		}
