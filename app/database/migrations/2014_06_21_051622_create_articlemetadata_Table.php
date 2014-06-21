@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ArticleContent extends Migration {
+class CreateArticlemetadataTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,12 +12,11 @@ class ArticleContent extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('ArticleContent', function(Blueprint $table)
+		Schema::create('article_metadata', function(Blueprint $table)
 		{
 			$table->increments('id');
 			$table->integer('article_id');
-			$table->integer('content_id');
-			$table->integer('ordinal');
+			$table->integer('metadata_id');
 			$table->timestamps();
 		});
 	}
@@ -29,7 +28,7 @@ class ArticleContent extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('ArticleContent');
+		Schema::drop('article_metadata');
 	}
 
 }
