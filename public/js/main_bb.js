@@ -43,9 +43,14 @@ AppMain = (function(Backbone, $){
 		},
 
 		sanitizePath: function(path){
-			var safePath = path.replace(new RegExp("/", 'g'), "_");
-			safePath = safePath.replace(new RegExp("'", 'g'), "_");
-			return safePath;
+			if(path){
+				var safePath = path.replace(new RegExp("/", 'g'), "_");
+				safePath = safePath.replace(new RegExp("'", 'g'), "_");
+				safePath = safePath.replace(new RegExp("\\.", 'g'), "_");
+				return safePath;
+			}else{
+				return path;
+			}
 		},
 
 		//SideBar
@@ -143,21 +148,23 @@ Article = (function(Backbone, $){
         setContent: function(){
         },
         loadArticle: function(){
+        	modelThis = this;
         	$.ajax({
 				type: "GET",
 				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX"
 			})
 			.done(function( data ) {
-				$.each(data.selectedArticle,function(index,article){
-					//start here...
-					console.log(article);
-					var safePath = douglas.sanitizePath(article.path);
-					this.id = article.id;
-					this.title = article.title;
-					this.path = article.path;
-					this.safePath = safePath;
-					this.data_level = article.data_level;
-				});
+				var article = data.selectedArticle;
+				//start here...
+				
+				var safePath = douglas.sanitizePath(article.path);
+				modelThis.id = article.id;
+				modelThis.title = article.title;
+				modelThis.path = article.path;
+				modelThis.safePath = safePath;
+				modelThis.data_level = article.data_level;
+
+				console.log(modelThis);
 				return data;
 			});
         },
@@ -296,7 +303,12 @@ ArticleTreeView = (function(Backbone, $){
 				
 				outerDiv.appendChild(treeIcon);
 
-				var titleText = document.createTextNode(article.title);
+				//var titleText = document.createTextNode(article.title);
+				var readablePath = article.path.substring(1,article.path.length -1);
+				var pathArray = readablePath.split("/");
+				readablePath = pathArray.pop();
+				var titleText = document.createTextNode(readablePath);
+
 				outerDiv.appendChild(titleText);
 
                 var innerDiv = document.createElement('div');
