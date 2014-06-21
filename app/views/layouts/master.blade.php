@@ -41,7 +41,8 @@
 								<li><a href="#">Move</a></li>
 							</ul>
 						</li>
-						<li><a href="#">Users</a></li>
+						<li>{{ HTML::link('users/login', 'Login') }}</li>
+						<!--<li><a href="#">Users</a></li>-->
 					</ul>
 				</div><!-- /.navbar-collapse -->
 			</div><!-- /.container -->
@@ -50,8 +51,8 @@
 
 	@section('pageAlerts')
 		<!-- Master Page Messages -->
-		
-		
+
+
 		<div class="pageAlerts">
 			<!-- Used in Backbone -->
 			<p class="hidden" id="pageAlert"></p>
@@ -65,13 +66,13 @@
 			@endif
 
 		</div>
-		
-		
+
+
 	@show
 
-	
+
 	<div class="row">
-	
+
 	@section('pageSidebar')
 		<!-- Master Page SideBar -->
 		<div class="col-md-1"></div>
