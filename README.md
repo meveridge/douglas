@@ -18,12 +18,15 @@ More Work to be done here.
 
 Setup Database
 =======
-//Prevent Class Errors
+##Prevent Class Errors
+
 composer dump-autoload
 
-//Run Database Migrations
+##Run Database Migrations
+
 php artisan migrate
 
-//Seed the Database
+##Seed the Database
+
 php artisan db:seed
 
