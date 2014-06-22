@@ -61,22 +61,45 @@ AppMain = (function(Backbone, $){
 		toggleTree: function(){
 			douglas.articleTreeView.toggleTree();
 		},
-
+	    closeTree: function(){
+	    	if($('.sidebar').hasClass('active')){
+				this.toggleTree();
+			}
+	    },
 		editArticleById: function(id){
-			douglas.showWait();
+			var continueOn = false;
+			if(douglas.Article != undefined){
+				if(douglas.Article.get('modified')==true){
+					if( confirm( "Are you sure?" ) ) {
+						continueOn = true;
+					}else{
+						continueOn = false;
+					}
+				}else{
+					continueOn = true;
+				}
+			}else{
+				continueOn = true;
+			}
 
-			var currArticle = new Article({ id:id });
-			currArticle.loadArticle();
-			currArticle.loadContent();
-			var articleView = new ArticleView({ model: currArticle });
-			articleView.render();
+			if(continueOn){
+
+				douglas.showWait();
+
+				var currArticle = new Article({ id:id });
+				currArticle.loadArticle();
+				currArticle.loadContent();
+				var articleView = new ArticleView({ model: currArticle });
+				articleView.render();
+				
+				douglas.initializeTinyMCE();
+				douglas.Article = currArticle;
+				douglas.ArticleView = articleView;
+				douglas.closeTree();
+				
+				douglas.hideWait();
 			
-			douglas.initializeTinyMCE();
-			douglas.selectedArticle = currArticle;
-			douglas.selectedArticleView = articleView;
-			douglas.toggleTree();
-			
-			douglas.hideWait();
+			}
 		},
 
 		initializeTinyMCE: function(){
@@ -156,8 +179,11 @@ Article = (function(Backbone, $){
 		safePath: "",
 		data_level: "",
 		content: "",
+		contentId: "",
+		modified:false,
 
         initialize: function(){
+        	//this.on("change",function(msg) { alert("Triggered " + msg); });
         },
         loadContent: function(){
         	console.log("...Loading Article Content");
@@ -165,11 +191,17 @@ Article = (function(Backbone, $){
 			return $.ajax({
 				type: "GET",
 				async: false,
-				url: douglas.public_path+"article/content/"+this.id+"?base=AJAX"
+				url: douglas.public_path+"article/content/"+this.id+"?base=AJAX",
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
 			})
 			.done(function( data ) {
 				var articleContent = data.articleContents;
 				modelThis.content = articleContent.html;
+				modelThis.contentId = articleContent.id;
 				console.log("Article Content Loaded")
 				return modelThis;
 			});
@@ -180,7 +212,12 @@ Article = (function(Backbone, $){
         	return $.ajax({
 				type: "GET",
 				async: false,
-				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX"
+				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX",
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
 			})
 			.done(function( data ) {
 				var article = data.selectedArticle;
@@ -195,6 +232,48 @@ Article = (function(Backbone, $){
 				console.log("Article Loaded");
 				return modelThis;
 			});
+        },
+        saveArticleContent: function(){
+        	douglas.showWait();
+        	console.log("...Saving Article Content");
+        	modelThis = this;
+        	return $.ajax({
+				type: "POST",
+				async: false,
+				url: douglas.public_path+"article/save/"+this.id+"?base=AJAX",
+				data: { contentId: this.contentId, content: this.content },
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
+			})
+			.done(function( data ) {
+				if(data.error){
+					douglas.setMessage("Error saving...","danger");
+					douglas.showMessage();
+				}else{
+					var message = "";
+					console.log(data);
+					if(data.articleResults == true) message = message + "Article Saved \n";
+					if(data.articleContentsResults == true) message = message + "Article Contents Saved \n";
+
+					douglas.setMessage(message,"success");
+					douglas.showMessage();
+					
+					modelThis.set('modified',false);
+
+					douglas.hideWait();
+
+				}
+				return modelThis;
+			});
+        },
+        publishArticle: function(){
+        },
+        unpublishArticle: function(){
+        },
+        destroyArticle: function(){
         },
 	});
 })(Backbone, jQuery);
@@ -213,7 +292,12 @@ ArticleTree = (function(Backbone, $){
 			$.ajax({
 				type: "GET",
 				url: douglas.public_path+"article/index/AJAX",
-				data: { currentPath: path, dataLevel: data_level }
+				data: { currentPath: path, dataLevel: data_level },
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
 			})
 			.done(function( data ) {
 				$.each(data.articleRecords,function(index,article){
@@ -301,15 +385,6 @@ ArticleTreeView = (function(Backbone, $){
 		},
 	    render: function(parentBranch){
 
-	    	/* //Using Templates
-	    	var templateSrc = "<% _.each(articleList, function(article) { %><tr><td><%= article.title %></td><td><%= article.safePath %></td><td><%= article.data_level %></td></tr><% }); %>";
-
-			var template = _.template(templateSrc, {
-				articleList: douglas.artliceList.toJSON()
-			});
-			this.$el.html(template);
-			*/
-
 			//Using JS and JQuery
 			resultHTML = "";
 			var mainDiv = document.createElement('span');
@@ -341,7 +416,7 @@ ArticleTreeView = (function(Backbone, $){
 
 				var treeLink = document.createElement('a');
 				treeLink.setAttribute('href', '#');
-				treeLink.setAttribute('title', 'article.title');
+				treeLink.setAttribute('title', article.title);
 				treeLink.appendChild(titleText);
 				treeLink.setAttribute('onClick', 'douglas.editArticleById(\"'+article.id+'\")');
 				
@@ -385,7 +460,6 @@ ArticleTreeView = (function(Backbone, $){
 	    	//this.render("/");
 			$('.sidebar').toggleClass('active');
 			$('.sideBarButton').toggleClass('active');
-
 	    },
 	    toggleBranch: function(branch,level){
 	    	level = parseInt(level)+1;
@@ -402,22 +476,34 @@ ArticleView = (function(Backbone, $){
 	return Backbone.View.extend({
 
 		el: "#articleContent",
+		events: {
+			"click": function () {
+				douglas.closeTree();
+			},
+			"keypress": function () {
+				this.model.content = tinyMCE.activeEditor.getContent();
+				this.model.set('modified',true);
+			},
+        },
 		initialize: function(){
 	    	//this.model.view = this;
+
 		},
 	    render: function(parentBranch){
 	    	//this.$el.empty().append(this.model.message);
 
-	    	console.log("Rending Article");
+	    	console.log("Rendering Article");
 
 	    	var article = {
 	    			id: this.model.id,
 	    			title: this.model.title,
 	    			path: this.model.path,
 					content: this.model.content,
+					contentId: this.model.contentId,
 	    		};
 
 	    	var templateSrc = "<input type='hidden' id='currentArticleId' value='<%= article.id %>' />";
+	    	templateSrc = templateSrc + "<input type='hidden' id='currentArticleContentsId' value='<%= article.contentId %>' />";
 	    	templateSrc = templateSrc + "<input type='hidden' id='currentPath' value='<%= article.path %>' />";
 	    	templateSrc = templateSrc + "<div style='margin:20px;'>&nbsp;</div>";
 	    	templateSrc = templateSrc + "<h1><%= article.title %></h1>";
@@ -427,6 +513,37 @@ ArticleView = (function(Backbone, $){
 				article: article
 			});
 			this.$el.html(template);
+			douglas.actionPane.initialize();
+			douglas.actionPane.addButton("icon",{class:"octicon octicon-sync",title:"Refresh",text:""},"douglas.editArticleById(douglas.Article.id)");
+			douglas.actionPane.addButton("button",{class:"btn btn-primary btn-xs", title:"Save Article Contents",text:"Save"},"douglas.Article.saveArticleContent()");
+			douglas.actionPane.addButton("button",{class:"btn btn-success btn-xs", title:"Publish Article",text:"Publish"},"douglas.Article.publishArticle()");
+			douglas.actionPane.addButton("button",{class:"btn btn-warning btn-xs", title:"Unpublish Article",text:"Unpublish"},"douglas.Article.unpublishArticle()");
+			douglas.actionPane.addButton("button",{class:"btn btn-danger btn-xs", title:"Destroy Article",text:"Destroy"},"douglas.Article.destroyArticle");
+	    },
+	});
+})(Backbone, jQuery);
+
+ActionView = (function(Backbone, $){
+	return Backbone.View.extend({
+
+		el: "#actionsPane",
+		initialize: function(){
+			this.$el.empty();
+		},
+	    render: function(){
+	    },
+	    addButton: function(type,data,action){
+	    	if(type=="icon"){
+	    		var templateSrc = "<span class=\"actionButton <%= data.class %>\" style=\"\" title=\"<%= data.title %>\" onClick=\"<%= action %>\"><%= data.text %></span>";
+	    	}else{
+	    		var templateSrc = "<button type=\"button\" class=\"actionButton <%= data.class %>\" style=\"margin:5px;\" title=\"<%= data.title %>\" onClick=\"<%= action %>\"><%= data.text %></button>";
+	    	}
+	    	
+	    	var template = _.template(templateSrc, {
+				data:data,
+				action:action,
+			});
+			this.$el.append(template);
 	    },
 	});
 })(Backbone, jQuery);
@@ -436,6 +553,8 @@ ArticleView = (function(Backbone, $){
  */
 
 var douglas = new AppMain();
+_.extend(douglas, Backbone.Events); 
+douglas.on("click", function(msg) { alert("Triggered " + msg); });
 
 $(function(){
 	
@@ -447,6 +566,7 @@ $(function(){
 	douglas.articleTree = new ArticleTree();
 
 	douglas.articleTreeView = new ArticleTreeView();
+	douglas.actionPane = new ActionView();
 
 	//douglas.initializeTinyMCE();
 
