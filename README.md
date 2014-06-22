@@ -1,20 +1,15 @@
 douglas
 =======
+Requirements:
+*Laravel
+*Composer
+*YAML
 
-Install PEAR/PECL
-=======
-
+User PEAR/PECL to configure PHP dependencies:
 http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
 
-Install YAML
-=======
-
+#Install YAML
 pecl install yaml
-
-Install Horde Text Diff
-=======
-http://www.horde.org/libraries/Horde_Text_Diff/download
-More Work to be done here.
 
 Setup Database
 =======
@@ -30,3 +25,11 @@ php artisan migrate
 
 php artisan db:seed
 
+
+
+ToDo:
+=======
+
+#Install Horde Text Diff
+http://www.horde.org/libraries/Horde_Text_Diff/download
+More Work to be done here.
