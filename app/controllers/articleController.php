@@ -211,6 +211,59 @@ class articleController extends \BaseController {
 	}
 
 	/**
+	 * Save an Article by Id
+	 *
+	 * @return Response
+	 */
+	public function postSave($id)
+	{
+		$method = Request::method();
+
+		if (Request::isMethod('post'))
+		{
+			$results = array();
+			$error = false;
+
+			$articleId = Input::get('articleId');
+			$title = Input::get('inputArticleTitle');
+			$path = Input::get('inputArticlePath');
+			//$path = Input::get('inputArticlePath');
+
+			//If we are saving the article
+			if(isset($articleId)){
+				$article = Article::find($articleId);
+				$article->title = $title;
+				$article->path = $path;
+				$articleResults = $article->save();
+			}
+
+			$contentId = Input::get('contentId');
+			$content = Input::get('content');
+
+			//If we are saving the content
+			if(isset($contentId)){
+				$articleContent = Content::find($contentId);
+				$articleContent->html = $content;
+				$articleContentsResults = $articleContent->save();
+			}
+
+			if(isset($articleResults) && $articleResults===false){
+				$error = true;
+			}elseif(isset($articleContentsResults) && $articleContentsResults===false){
+				$error = true;
+			}
+			return Response::json(
+				array(
+	    			'error' => $error,
+	    			'articleResults' => (isset($articleResults) ? $articleResults : 0),
+	    			'articleContentsResults' => (isset($articleContentsResults) ? $articleContentsResults : 0),
+				),
+	    		200
+			); 
+		}
+	}
+
+	/**
 	 * Create article db record
 	 *
 	 * @return Response
@@ -225,6 +278,20 @@ class articleController extends \BaseController {
 	    
 	    //$articleId = DB::table('articles')->insertGetId($data);
 		return $article->id;
+	}
+
+	/**
+	 * Save article db record
+	 *
+	 * @return Response
+	 */
+	public function saveArticleRecord($data = array())
+	{
+		$article = Article::find($data['id']);
+
+		$article->email = 'john@foo.com';
+
+		$article->save();
 	}
 
 	/**
@@ -252,6 +319,20 @@ class articleController extends \BaseController {
 	    $articleContentId = DB::table('article_content')->insertGetId($articleContentData);
 
 		return $contentId;
+	}
+
+	/**
+	 * Save article content db record
+	 *
+	 * @return Response
+	 */
+	public function saveArticleContentRecord($data = array())
+	{
+		$article = Article::find($data['id']);
+
+		$article->email = 'john@foo.com';
+
+		$article->save();
 	}
 
 	/**
