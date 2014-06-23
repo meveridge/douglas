@@ -18,12 +18,13 @@
     <input type="hidden" id= "openIcon" value="{{ $openIcon }}" />
 
     <div id="sideBar">
-    <button type="button" class="btn btn-primary btn-xs sideBarButton" data-toggle="sideBar"><span class="glyphicon {{$closedIcon}}"></span></button>
-    <div id="articleTree" class="sidebar tree">
-      <div id="articleTreeHeader"><h1><small>SugarCRM Support</small></h1></div>
-      <div id="articleTreeContent">
-    		
-    </div>
+        <button type="button" class="btn btn-primary btn-xs sideBarButton" data-toggle="sideBar"><span class="glyphicon {{$closedIcon}}"></span></button>
+        <div id="articleTree" class="sidebar tree">
+            <div id="articleTreeHeader"><h1><small>SugarCRM Support</small></h1></div>
+            <div id="articleTreeContent">
+        		
+            </div>
+        </div>
     </div>
 
 @stop

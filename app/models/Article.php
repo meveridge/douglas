@@ -6,4 +6,12 @@ class Article extends Eloquent {
 
     protected $fillable = array('title','path','data_level');
 
+	public function ArticleContent(){
+        return $this->hasMany('ArticleContent');
+    }
+
+    public function ArticleMetadata(){
+        return $this->hasMany('ArticleMetadata');
+    }
+
 }

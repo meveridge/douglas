@@ -18,6 +18,7 @@ class CreateArticlemetadataTable extends Migration {
 			$table->integer('article_id');
 			$table->integer('metadata_id');
 			$table->timestamps();
+			//$table->foreign('article_id')->references('id')->on('article');
 		});
 	}
 
