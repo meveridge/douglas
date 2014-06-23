@@ -90,8 +90,8 @@
 		<div id="footer">
 			<div class="container-fluid">
 				<div class="row">
-					<div class="col-md-4 text-muted">Douglas for SugarCRM</div>
-					<div class="col-md-7 text-muted"></div>
+					<div class="col-md-2 text-muted">Douglas for SugarCRM</div>
+					<div class="col-md-9 text-muted" id="actionsPane"></div>
 					<div class="col-md-1 text-muted waitIndicator pull-right">
 						<span id="pageFooterWaitText" class="small hidden"></span>
 						<span id="pageFooterWaitIcon" class="glyphicon spin hidden"></span>
