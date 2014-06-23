@@ -6,4 +6,8 @@ class ArticleContent extends Eloquent {
 
     //protected $fillable = array('title','path','data_level');
 
+    public function Content(){
+        return $this->hasOne('Content');
+    }
+
 }
