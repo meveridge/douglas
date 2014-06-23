@@ -31,12 +31,12 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
-						<li {{ isset($activeLink) ? '' : 'class="active"' }}><a href="http://localhost/douglas/public/">Home</a></li>
+						<li {{ isset($activeLink) ? '' : 'class="active"' }}><a href="http://douglas/public/">Home</a></li>
 						<li class="dropdown {{ isset($activeLink) && $activeLink == "article" ? 'active' : '' }}">
 							<a href="" class="dropdown-toggle" data-toggle="dropdown">Articles <b class="caret"></b></a>
 							<ul class="dropdown-menu">
-								<li><a href="http://localhost/douglas/public/article/index/web">View</a></li>
-								<li><a href="http://localhost/douglas/public/article/create">New</a></li>
+								<li><a href="http://douglas/article/index/web">View</a></li>
+								<li><a href="http://douglas/article/create">New</a></li>
 								<li><a href="#">Copy</a></li>
 								<li><a href="#">Move</a></li>
 							</ul>
