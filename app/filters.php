@@ -90,7 +90,5 @@ Route::filter('guest', function()
 //This filter will return a user to the login screen if they are logged out
 Route::filter('auth', function()
 {
-        if (Auth::guest())
-                return Redirect::route('login')
-                        ->with('flash_error', 'You must be logged in to view this page!');
+    if (Auth::guest()) return Redirect::guest('users/login');
 });
