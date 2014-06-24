@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration {
                 $table->string('password', 64);
                 $table->tinyInteger('isAdmin');
 								$table->string('avatar');
+								$table->string('remember_token', 100);
 								$table->timestamps();
 
         });
