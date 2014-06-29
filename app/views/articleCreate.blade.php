@@ -10,8 +10,8 @@
 				<h4 class="modal-title">Create Article</h4>
 			</div>
 			<div class="modal-body">
-				
-			<form id="createArticle" role="form" action="http://localhost/douglas/public/article/create" method="POST">
+
+			<form id="createArticle" role="form" action="http://douglas/article/create" method="POST">
 				<div class="form-group">
 					<label for="inputArticleTitle">Title</label>
 					<input type="text" class="form-control" id="inputArticleTitle" name="inputArticleTitle" placeholder="Article Title">

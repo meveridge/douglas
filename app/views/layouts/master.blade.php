@@ -41,20 +41,12 @@
 								<li><a href="#">Move</a></li>
 							</ul>
 						</li>
-<<<<<<< HEAD
 						 @if(!Auth::check())
                     <li>{{ HTML::link('users/login', 'Login') }}</li>
             @else
                     <li>{{ HTML::link('users/logout', 'Logout') }}</li>
             @endif
 						<!--<li>{{ HTML::link('users/login', 'Login') }}</li>-->
-=======
-						@if(!Auth::check())
-						  <li>{{ HTML::link('users/login', 'Login') }}</li>
-						@else
-              <li>{{ HTML::link('users/logout', 'logout') }}</li>
-            @endif
->>>>>>> master
 						<!--<li><a href="#">Users</a></li>-->
 					</ul>
 				</div><!-- /.navbar-collapse -->

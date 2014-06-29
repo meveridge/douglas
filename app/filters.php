@@ -91,9 +91,6 @@ Route::filter('guest', function()
 //This filter will return a user to the login screen if they are logged out
 Route::filter('auth', function()
 {
-<<<<<<< HEAD
-    if (Auth::guest()) return Redirect::guest('users/login');
-=======
+    //if (Auth::guest()) return Redirect::guest('users/login');
 		if (Auth::guest()) return Redirect::guest('users/login');
->>>>>>> master
 });
