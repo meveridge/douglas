@@ -2,7 +2,7 @@
 
 class articleController extends \BaseController {
 
-	public $masterDir = "";
+	public $masterDir = "/Library/WebServer/Documents/pine/pineneedles/contents/";
 
 	/**
 	 * Display a listing of the resource
@@ -130,9 +130,12 @@ class articleController extends \BaseController {
 		}else{
 			//return $selectedArticle;
 			//var_dump($selectedArticle);
-			return Response::json(array(
-        		'error' => false,
-        		'selectedArticle' => $selectedArticle),
+
+			return Response::json(
+				array(
+        			'error' => false,
+        			'selectedArticle' => $selectedArticle,
+        		),
         		200
     		);
 		}
@@ -179,6 +182,76 @@ class articleController extends \BaseController {
 	}
 
 	/**
+	 * Get Method for publishing an article's content
+	 * Return JSON data
+	 *
+	 * @return Response
+	 */
+	public function getPublish($id)
+	{
+		$base = Input::get('base');
+
+		//Retreive Article header 
+		$article = Article::find($id);
+
+		//Retreive Article MetaData not in header
+		$articleMetadata = ArticleMetadata::where('article_id', $article->id)
+			->get();
+		$metadata = array();
+		foreach($articleMetadata as $index=>$data){
+			$metadata[] = Metadata::find($data->metadata_id);
+		}
+		
+		//Retreive Article Content
+		$articleContent = ArticleContent::where('article_id', $article->id)
+			->get();
+		$content = array();
+		foreach($articleContent as $index=>$data){
+			$content[] = Content::find($data->content_id);
+		}
+
+		//Build index.md from all sources
+
+		$articleFileContents = "---\n";
+
+		foreach($metadata as $key=>$value){
+			$articleFileContents .= $value->key.":".$value->value."\n";
+			//echo $value->key.":".$value->value."<br>";
+		}
+		$articleFileContents .= "---\n\n";
+
+		foreach($content as $key=>$value){
+			$articleFileContents .= $value->html;
+		}
+		echo "<textarea>$articleFileContents</textarea>";
+
+		//Create index.md file in the correct path
+		//$fileResults = file_put_contents($this->masterDir.$article->path."index.md", $articleFileContents);
+		$fileResults = File::put($this->masterDir.$article->path."index.md", $articleFileContents);
+		
+		$result = "";
+		if($fileResults===true){
+			$result = "File(".$this->masterDir.$article->path."index.md) written successfully.";
+			$error = false;
+		}else{
+			$result = "File Write Failure!";
+			$error = true;
+		}
+
+		if($base=="web"){
+			return $result;
+		}else{
+			return Response::json(
+				array(
+		    		'error' => $error,
+		    		'result' => $result
+				),
+	    		200
+			);
+		}
+	}
+
+	/**
 	 * Show the form for creating a new resource.
 	 *
 	 * @return Response
@@ -208,6 +281,59 @@ class articleController extends \BaseController {
 	}
 
 	/**
+	 * Save an Article by Id
+	 *
+	 * @return Response
+	 */
+	public function postSave($id)
+	{
+		$method = Request::method();
+
+		if (Request::isMethod('post'))
+		{
+			$results = array();
+			$error = false;
+
+			$articleId = Input::get('articleId');
+			$title = Input::get('inputArticleTitle');
+			$path = Input::get('inputArticlePath');
+			//$path = Input::get('inputArticlePath');
+
+			//If we are saving the article
+			if(isset($articleId)){
+				$article = Article::find($articleId);
+				$article->title = $title;
+				$article->path = $path;
+				$articleResults = $article->save();
+			}
+
+			$contentId = Input::get('contentId');
+			$content = Input::get('content');
+
+			//If we are saving the content
+			if(isset($contentId)){
+				$articleContent = Content::find($contentId);
+				$articleContent->html = $content;
+				$articleContentsResults = $articleContent->save();
+			}
+
+			if(isset($articleResults) && $articleResults===false){
+				$error = true;
+			}elseif(isset($articleContentsResults) && $articleContentsResults===false){
+				$error = true;
+			}
+			return Response::json(
+				array(
+	    			'error' => $error,
+	    			'articleResults' => (isset($articleResults) ? $articleResults : 0),
+	    			'articleContentsResults' => (isset($articleContentsResults) ? $articleContentsResults : 0),
+				),
+	    		200
+			); 
+		}
+	}
+
+	/**
 	 * Create article db record
 	 *
 	 * @return Response
@@ -225,6 +351,20 @@ class articleController extends \BaseController {
 	}
 
 	/**
+	 * Save article db record
+	 *
+	 * @return Response
+	 */
+	public function saveArticleRecord($data = array())
+	{
+		$article = Article::find($data['id']);
+
+		$article->email = 'john@foo.com';
+
+		$article->save();
+	}
+
+	/**
 	 * Create article content db record
 	 *
 	 * @return Response
@@ -239,7 +379,19 @@ class articleController extends \BaseController {
 		//$contentData['date_modified'] = $data['date_modified'];
 		$contentData['html'] = $data['html'];
 
-		$contentId = DB::table('content')->insertGetId($contentData);
+		echo"String Length #3:".strlen($data['html']);
+
+		//$contentId = DB::table('content')->insertGetId($contentData);
+
+		$Content = new Content;
+		$Content->html = $data['html'];
+		$Content->save();
+
+		$queries = DB::getQueryLog();
+		$last_query = end($queries);
+		echo"String Length #4:".strlen($queries['5']['bindings']['0']);
+
+		$contentId = $Content->id;
 
 
 		$articleContentData['ordinal'] = $data['ordinal'];
@@ -249,6 +401,20 @@ class articleController extends \BaseController {
 	    $articleContentId = DB::table('article_content')->insertGetId($articleContentData);
 
 		return $contentId;
+	}
+
+	/**
+	 * Save article content db record
+	 *
+	 * @return Response
+	 */
+	public function saveArticleContentRecord($data = array())
+	{
+		$article = Article::find($data['id']);
+
+		$article->email = 'john@foo.com';
+
+		$article->save();
 	}
 
 	/**
@@ -369,16 +535,21 @@ class articleController extends \BaseController {
 		//
 	}
 
+	public function getFile(){
+		$articleString = file_get_contents("/Library/WebServer/Documents/pine/pineneedles/contents/02_Documentation/01_Sugar_Editions/01_Sugar_Ultimate/Sugar_Ultimate_7.1/Administration_Guide/07_Developer_Tools/01_Studio/index.md");
+		echo"<textarea>$articleString</textarea>";
+	}
+
 	/**
 	 * Show the form for creating a new resource.
 	 *
 	 * @return Response
 	 */
-	public function getImport($path)
-	{
-		$this->masterDir = "/Library/WebServer/Documents/pine/pineneedles/contents/";
-
-		$this->loadDirectory($this->masterDir);
+	public function getImport()
+	{	
+		$path = Input::get('path', $this->masterDir);
+		//$this->masterDir = "/Library/WebServer/Documents/pine/pineneedles/contents/02_Documentation/01_Sugar_Editions/01_Sugar_Ultimate/Sugar_Ultimate_7.1/Administration_Guide/07_Developer_Tools/01_Studio/";
+		$this->loadDirectory($path);
 	}
 
 	public function loadDirectory($dir){
@@ -394,96 +565,111 @@ class articleController extends \BaseController {
 		        			//Currentrly on a dir, must go deeper
 		        			$this->loadDirectory($dir . $file . "/");
 		        		}elseif($file=="index.md"){
-		        			//Found an article! Load it!
-		        			$articleString = file_get_contents($dir . $file);
-		        			$articleArray = explode("---\n\n",$articleString);
-
-		        			// explode failed to separate the article from the yaml
-            				// try again with windows line endings...
-		        			if(count($articleArray) == 1){
-		        				$articleArray = explode("---\r\n\r\n",$articleString);
-		        			}
-							
-							(isset($articleArray['0']) ? $headerString = trim($articleArray['0']) : $headerString = "");
-		        			(isset($articleArray['1']) ? $contentString = trim($articleArray['1']) : $contentString = "");
-		        			
-		        			//Read Headers and parse metadata
-		        			try{
-		        				(($headerString!=="") ? $parsedMetaData = yaml_parse($headerString) : $parsedMetaData = "");
-		        			} catch (Exception $e) {
-    							echo '<hr>Caught exception on YAML: ',  $e->getMessage(), "\n";
-			    				echo "filename: $dir . $file <br> $headerString<hr>";
-    							$parsedMetaData = "";
-							}
-
-							//var_dump($parsedMetaData);
-		        			if(is_array($parsedMetaData)){
-
-		        				$parsedDir = substr($dir,strlen($this->masterDir)-1);
-		        				$newArticleData['path'] = $parsedDir;
-
-		        				$newArticleData['data_level'] = substr_count($parsedDir,"/");
-
-		        				//Previous MetaData, now stored on article record
-		        				if(isset($parsedMetaData['title'])) $newArticleData['title'] = $parsedMetaData['title'];
-		        				//if(isset($parsedMetaData['template'])) $newArticleData['template'] = $parsedMetaData['template'];
-		        				//if(isset($parsedMetaData['css'])) $newArticleData['css'] = $parsedMetaData['css'];
-		        				//if(isset($parsedMetaData['bodyclass'])) $newArticleData['bodyclass'] = $parsedMetaData['bodyclass'];
-		        				//if(isset($parsedMetaData['widgets'])) $newArticleData['widgets'] = $parsedMetaData['widgets'];
-		        				//if(isset($parsedMetaData['dateModified'])) $newArticleData['date_modified'] = $parsedMetaData['dateModified'];
-			        			
-			        			//Create Article Record
-			        			try{
-		        					$articleId = $this->createArticleRecord($newArticleData);
-			        			} catch (Exception $e) {
-	    							echo '<hr>Caught exception on Create Article: ';
-	    							print_r($e);
-			    					echo "filename: $dir . $file <hr>";
-	    							$articleId = false;
-								}
-								
-								
-								//Store Article Metadata
-								foreach($parsedMetaData as $key=>$value){
-									if(!in_array($key, $newArticleData)){
-										//Only create metadata for things not on the Article record
-										try{
-				        					$metaId = $this->createArticleMetadataRecord(
-												array(
-													'key'=>$key,
-													'value'=>$value,
-												),
-												$articleId
-											);
-					        			} catch (Exception $e) {
-			    							echo '<hr>Caught exception on Metadata Create: ',  $e->getMessage(), "\n";
-			    							echo "filename: $dir . $file <hr>";
-			    							$metaId = "";
-										}
-										
-										
-									}
-								}
-
-								//Store Article Content
-								$newArticleContentData['article_id'] = $articleId;
-								$newArticleContentData['html'] = $contentString;
-								$newArticleContentData['ordinal'] = "1";
-								$articleContentId = $this->createArticleContentRecord($newArticleContentData);
-
-								if($articleId) echo"Article id : $articleId created<br>";
-							}else{
-								echo "<hr>Error parsing article metadata. Skipping... <br>";
-			    				echo "filename: $dir . $file <hr>";
-							}
-
-							//Add Article Contents
+		        			$files[] = $dir . $file;
 		        		}
 		        	}
-		            
 		        }
 		        closedir($dh);
 		    }
+		}
+
+		if(count($files)>0){
+			foreach($files as $filename){
+
+				//Found an article! Load it!
+				//$articleString = file_get_contents($dir . $file);
+				$articleString = File::get($filename, "File Not Found ($filename)");
+
+				echo"String Len #1:".strlen($articleString);
+
+				//TODO: PHP is hating putting this into a variable.... 
+
+				echo"<textarea>$articleString</textarea>";
+
+				$articleArray = explode("---\n\n",$articleString);
+
+				// explode failed to separate the article from the yaml
+				// try again with windows line endings...
+				//echo"<br>Array Count: ".count($articleArray);
+				if(count($articleArray) == 1){
+					$articleArray = explode("---\r\n\r\n",$articleString);
+				}
+
+				(isset($articleArray['0']) ? $headerString = trim($articleArray['0']) : $headerString = "");
+				(isset($articleArray['1']) ? $contentString = trim($articleArray['1']) : $contentString = "");
+				echo"String Len #2:".strlen($contentString);
+
+				//Read Headers and parse metadata
+				try{
+					(($headerString!=="") ? $parsedMetaData = yaml_parse($headerString) : $parsedMetaData = "");
+				} catch (Exception $e) {
+					echo '<hr>Caught exception on YAML: ',  $e->getMessage(), "\n";
+					echo "filename: $dir . $file <br> $headerString<hr>";
+					$parsedMetaData = "";
+				}
+
+				//var_dump($parsedMetaData);
+				if(is_array($parsedMetaData)){
+
+					$parsedDir = substr($dir,strlen($this->masterDir)-1);
+					$newArticleData['path'] = $parsedDir;
+
+					$newArticleData['data_level'] = substr_count($parsedDir,"/");
+
+					//Previous MetaData, now stored on article record
+					if(isset($parsedMetaData['title'])) $newArticleData['title'] = $parsedMetaData['title'];
+					//if(isset($parsedMetaData['template'])) $newArticleData['template'] = $parsedMetaData['template'];
+					//if(isset($parsedMetaData['css'])) $newArticleData['css'] = $parsedMetaData['css'];
+					//if(isset($parsedMetaData['bodyclass'])) $newArticleData['bodyclass'] = $parsedMetaData['bodyclass'];
+					//if(isset($parsedMetaData['widgets'])) $newArticleData['widgets'] = $parsedMetaData['widgets'];
+					//if(isset($parsedMetaData['dateModified'])) $newArticleData['date_modified'] = $parsedMetaData['dateModified'];
+					
+					//Create Article Record
+					try{
+						$articleId = $this->createArticleRecord($newArticleData);
+					} catch (Exception $e) {
+						echo '<hr>Caught exception on Create Article: ';
+						print_r($e);
+						echo "filename: $dir . $file <hr>";
+						$articleId = false;
+					}
+					
+					
+					//Store Article Metadata
+					foreach($parsedMetaData as $key=>$value){
+						if(!in_array($key, $newArticleData)){
+							//Only create metadata for things not on the Article record
+							try{
+								$metaId = $this->createArticleMetadataRecord(
+									array(
+										'key'=>$key,
+										'value'=>$value,
+									),
+									$articleId
+								);
+							} catch (Exception $e) {
+								echo '<hr>Caught exception on Metadata Create: ',  $e->getMessage(), "\n";
+								echo "filename: $dir . $file <hr>";
+								$metaId = "";
+							}
+							
+							
+						}
+					}
+
+					//Store Article Content
+					$newArticleContentData['article_id'] = $articleId;
+					$newArticleContentData['html'] = $contentString;
+					$newArticleContentData['ordinal'] = "1";
+					$articleContentId = $this->createArticleContentRecord($newArticleContentData);
+
+					if($articleId) echo"Article id : $articleId created<br>";
+				}else{
+					echo "<hr>Error parsing article metadata. Skipping... <br>";
+					echo "filename: $dir . $file <hr>";
+				}
+
+			}
 		}
 	}
 

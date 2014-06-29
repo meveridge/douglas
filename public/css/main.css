@@ -16,6 +16,10 @@ body {
 	height: 40px;
 	background-color: #f5f5f5;
 }
+.actionButton {
+	cursor:pointer;
+	margin:5px;
+}
 div.pageAlerts{
 	position: absolute;
 	left: 50%;

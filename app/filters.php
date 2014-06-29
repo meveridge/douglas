@@ -35,7 +35,7 @@ App::after(function($request, $response)
 
 Route::filter('auth', function()
 {
-	if (Auth::guest()) return Redirect::guest('login');
+	if (Auth::guest()) return Redirect::guest('users/login');
 });
 
 
@@ -79,6 +79,7 @@ Route::filter('csrf', function()
 	}
 });
 
+
 // This filter checks if a user is already logged in. If they are, it redirects them.
 Route::filter('guest', function()
 {
@@ -90,5 +91,9 @@ Route::filter('guest', function()
 //This filter will return a user to the login screen if they are logged out
 Route::filter('auth', function()
 {
+<<<<<<< HEAD
     if (Auth::guest()) return Redirect::guest('users/login');
+=======
+		if (Auth::guest()) return Redirect::guest('users/login');
+>>>>>>> master
 });

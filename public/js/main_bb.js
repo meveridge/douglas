@@ -61,58 +61,95 @@ AppMain = (function(Backbone, $){
 		toggleTree: function(){
 			douglas.articleTreeView.toggleTree();
 		},
+	    closeTree: function(){
+	    	if($('.sidebar').hasClass('active')){
+				this.toggleTree();
+			}
+	    },
+		editArticleById: function(id){
+			var continueOn = false;
+			if(douglas.Article != undefined){
+				if(douglas.Article.get('modified')==true){
+					if( confirm( "Are you sure?" ) ) {
+						continueOn = true;
+					}else{
+						continueOn = false;
+					}
+				}else{
+					continueOn = true;
+				}
+			}else{
+				continueOn = true;
+			}
+
+			if(continueOn){
+
+				douglas.showWait();
+
+				var currArticle = new Article({ id:id });
+				currArticle.loadArticle();
+				currArticle.loadContent();
+				var articleView = new ArticleView({ model: currArticle });
+				articleView.render();
+				
+				douglas.initializeTinyMCE();
+				douglas.Article = currArticle;
+				douglas.ArticleView = articleView;
+				douglas.closeTree();
+				
+				douglas.hideWait();
+			
+			}
+		},
 
 		initializeTinyMCE: function(){
 			tinymce.init({
-			    selector: "div.editable",
-			    theme: "modern",
-			    plugins: [
-			        ["advlist autolink link pineimage lists charmap print preview hr anchor pagebreak spellchecker"],
-			        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
-			        ["save table contextmenu directionality emoticons template paste textcolor pinelink pinecode"]
-			    ],
-			    contextmenu: "link pinelink image | inserttable | cell row column deletetable",
-			    style_formats_merge: true,
-			    add_unload_trigger: false,
-			    schema: "html5",
-			    inline: true,
-			    toolbar1: "undo redo | styleselect | pinecode | bold underline italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image ",
-			    toolbar2: "forecolor backcolor | print preview media",
-			    statusbar: true,
-			    image_list: [],
-			    convert_urls: false,
-			    browser_spellcheck : true,
-			    setup : function(ed) {
-			        ed.on('KeyDown',function(e) {
-			            if (e.keyCode == 9 && !e.altKey && !e.ctrlKey){
-			                if (e.shiftKey){
-			                    tinyMCE.activeEditor.editorCommands.execCommand("outdent");
-			                }else{
-			                    tinyMCE.activeEditor.editorCommands.execCommand("indent");
-			                }
-			                return tinymce.dom.Event.cancel(e); 
-			            }else if (e.keyCode == 9 && !e.ctrlKey && e.altKey && !e.shiftKey){
-			                tinyMCE.activeEditor.editorCommands.execCommand('mceInsertContent', false, "&nbsp;&nbsp;&nbsp;");
-			                return tinymce.dom.Event.cancel(e); 
-			            }
-			            
-			        });
-			    },
-			    setup : function(ed) {
-			        ed.on('BeforeSetContent',function(e) {
-			            if(e.initial === true){
-			            }else{
-			                e.content = e.content.replace(/    /g,"&nbsp;&nbsp;&nbsp;&nbsp;");
-			                e.content = e.content.replace(/   /g,"&nbsp;&nbsp;&nbsp;");
-			                e.content = e.content.replace(/  /g,"&nbsp;&nbsp;");
-			            }
-			        });
-			    },
-			    paste_preprocess : function(pl, o) {
-			            //alert(o.content);
-			            //o.content = o.content.replace(/\>\s+\</g,"&nbsp;");
-			    }
-			});
+		        selector: "div.editable",
+		        theme: "modern",
+		        plugins: [
+		          ["advlist autolink link pineimage lists charmap print preview hr anchor pagebreak"],
+		          ["searchreplace wordcount visualblocks visualchars codemirror fullscreen insertdatetime media nonbreaking"],
+		          ["save table contextmenu directionality emoticons template paste textcolor pinelink pinecode"]
+		        ],
+		        contextmenu: "link pinelink image | inserttable | cell row column deletetable",
+		        style_formats_merge: true,
+		        add_unload_trigger: false,
+		        schema: "html5",
+		        inline: true,
+		        toolbar1: "undo redo | styleselect | pinecode | bold underline italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image ",
+		        toolbar2: "forecolor backcolor | print preview media",
+		        statusbar: true,
+		        image_list: [],
+		        convert_urls: false,
+		        browser_spellcheck : true,
+		        codemirror: {
+		          indentOnInit: true, // Whether or not to indent code on init. 
+		          path: douglas.public_path+'deps/CodeMirror', // Path to CodeMirror distribution
+		        },
+		        setup: function(ed) {
+		          ed.on('BeforeSetContent',function(e) {
+		            if(e.initial === true){
+		            }else if(e.selection === true){
+		              e.content = e.content.replace(/    /g,"&nbsp;&nbsp;&nbsp;&nbsp;");
+		              e.content = e.content.replace(/   /g,"&nbsp;&nbsp;&nbsp;");
+		              e.content = e.content.replace(/  /g,"&nbsp;&nbsp;");
+		            }
+		          });
+		          ed.on('KeyDown',function(e) {
+		            if (e.keyCode == 9 && !e.altKey && !e.ctrlKey){
+		              if (e.shiftKey){
+		                tinymce.activeEditor.editorCommands.execCommand("outdent");
+		              }else{
+		                tinymce.activeEditor.editorCommands.execCommand("indent");
+		              }
+		              return tinymce.dom.Event.cancel(e); 
+		            }else if (e.keyCode == 9 && !e.ctrlKey && e.altKey && !e.shiftKey){
+		              tinymce.activeEditor.editorCommands.execCommand('mceInsertContent', false, "&nbsp;&nbsp;&nbsp;");
+		              return tinymce.dom.Event.cancel(e); 
+		            }
+		          });
+		        }
+		      });
 		},
 
 		//User Preferences
@@ -142,31 +179,101 @@ Article = (function(Backbone, $){
 		safePath: "",
 		data_level: "",
 		content: "",
+		contentId: "",
+		modified:false,
 
         initialize: function(){
+        	//this.on("change",function(msg) { alert("Triggered " + msg); });
         },
-        setContent: function(){
+        loadContent: function(){
+        	console.log("...Loading Article Content");
+			modelThis = this;
+			return $.ajax({
+				type: "GET",
+				async: false,
+				url: douglas.public_path+"article/content/"+this.id+"?base=AJAX",
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
+			})
+			.done(function( data ) {
+				var articleContent = data.articleContents;
+				modelThis.content = articleContent.html;
+				modelThis.contentId = articleContent.id;
+				console.log("Article Content Loaded")
+				return modelThis;
+			});
         },
         loadArticle: function(){
+        	console.log("...Loading Article");
         	modelThis = this;
-        	$.ajax({
+        	return $.ajax({
 				type: "GET",
-				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX"
+				async: false,
+				url: douglas.public_path+"article/edit/"+this.id+"?base=AJAX",
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
 			})
 			.done(function( data ) {
 				var article = data.selectedArticle;
-				//start here...
-				
 				var safePath = douglas.sanitizePath(article.path);
+
 				modelThis.id = article.id;
 				modelThis.title = article.title;
 				modelThis.path = article.path;
 				modelThis.safePath = safePath;
 				modelThis.data_level = article.data_level;
 
-				console.log(modelThis);
-				return data;
+				console.log("Article Loaded");
+				return modelThis;
 			});
+        },
+        saveArticleContent: function(){
+        	douglas.showWait();
+        	console.log("...Saving Article Content");
+        	modelThis = this;
+        	return $.ajax({
+				type: "POST",
+				async: false,
+				url: douglas.public_path+"article/save/"+this.id+"?base=AJAX",
+				data: { contentId: this.contentId, content: this.content },
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
+			})
+			.done(function( data ) {
+				if(data.error){
+					douglas.setMessage("Error saving...","danger");
+					douglas.showMessage();
+				}else{
+					var message = "";
+					console.log(data);
+					if(data.articleResults == true) message = message + "Article Saved \n";
+					if(data.articleContentsResults == true) message = message + "Article Contents Saved \n";
+
+					douglas.setMessage(message,"success");
+					douglas.showMessage();
+					
+					modelThis.set('modified',false);
+
+					douglas.hideWait();
+
+				}
+				return modelThis;
+			});
+        },
+        publishArticle: function(){
+        },
+        unpublishArticle: function(){
+        },
+        destroyArticle: function(){
         },
 	});
 })(Backbone, jQuery);
@@ -185,7 +292,12 @@ ArticleTree = (function(Backbone, $){
 			$.ajax({
 				type: "GET",
 				url: douglas.public_path+"article/index/AJAX",
-				data: { currentPath: path, dataLevel: data_level }
+				data: { currentPath: path, dataLevel: data_level },
+				error: function(x, e) {
+					var responseObj = $.parseJSON(x.responseText);
+					douglas.setMessage("Error Status: "+x.status+"\n"+responseObj.error.message,"danger");
+					douglas.showMessage();
+        		},
 			})
 			.done(function( data ) {
 				$.each(data.articleRecords,function(index,article){
@@ -273,15 +385,6 @@ ArticleTreeView = (function(Backbone, $){
 		},
 	    render: function(parentBranch){
 
-	    	/* //Using Templates
-	    	var templateSrc = "<% _.each(articleList, function(article) { %><tr><td><%= article.title %></td><td><%= article.safePath %></td><td><%= article.data_level %></td></tr><% }); %>";
-
-			var template = _.template(templateSrc, {
-				articleList: douglas.artliceList.toJSON()
-			});
-			this.$el.html(template);
-			*/
-
 			//Using JS and JQuery
 			resultHTML = "";
 			var mainDiv = document.createElement('span');
@@ -303,13 +406,21 @@ ArticleTreeView = (function(Backbone, $){
 				
 				outerDiv.appendChild(treeIcon);
 
-				//var titleText = document.createTextNode(article.title);
+				//var titleText = document.createTextNodearticle.title;
 				var readablePath = article.path.substring(1,article.path.length -1);
 				var pathArray = readablePath.split("/");
 				readablePath = pathArray.pop();
-				var titleText = document.createTextNode(readablePath);
 
-				outerDiv.appendChild(titleText);
+				var titleText = document.createTextNode(readablePath);
+				//outerDiv.appendChild(titleText);
+
+				var treeLink = document.createElement('a');
+				treeLink.setAttribute('href', '#');
+				treeLink.setAttribute('title', article.title);
+				treeLink.appendChild(titleText);
+				treeLink.setAttribute('onClick', 'douglas.editArticleById(\"'+article.id+'\")');
+				
+				outerDiv.appendChild(treeLink);
 
                 var innerDiv = document.createElement('div');
                 innerDiv.setAttribute('id', safePath);
@@ -349,7 +460,6 @@ ArticleTreeView = (function(Backbone, $){
 	    	//this.render("/");
 			$('.sidebar').toggleClass('active');
 			$('.sideBarButton').toggleClass('active');
-
 	    },
 	    toggleBranch: function(branch,level){
 	    	level = parseInt(level)+1;
@@ -362,11 +472,89 @@ ArticleTreeView = (function(Backbone, $){
 	});
 })(Backbone, jQuery);
 
+ArticleView = (function(Backbone, $){
+	return Backbone.View.extend({
+
+		el: "#articleContent",
+		events: {
+			"click": function () {
+				douglas.closeTree();
+			},
+			"keypress": function () {
+				this.model.content = tinyMCE.activeEditor.getContent();
+				this.model.set('modified',true);
+			},
+        },
+		initialize: function(){
+	    	//this.model.view = this;
+
+		},
+	    render: function(parentBranch){
+	    	//this.$el.empty().append(this.model.message);
+
+	    	console.log("Rendering Article");
+
+	    	var article = {
+	    			id: this.model.id,
+	    			title: this.model.title,
+	    			path: this.model.path,
+					content: this.model.content,
+					contentId: this.model.contentId,
+	    		};
+
+	    	var templateSrc = "<input type='hidden' id='currentArticleId' value='<%= article.id %>' />";
+	    	templateSrc = templateSrc + "<input type='hidden' id='currentArticleContentsId' value='<%= article.contentId %>' />";
+	    	templateSrc = templateSrc + "<input type='hidden' id='currentPath' value='<%= article.path %>' />";
+	    	templateSrc = templateSrc + "<div style='margin:20px;'>&nbsp;</div>";
+	    	templateSrc = templateSrc + "<h1><%= article.title %></h1>";
+	    	templateSrc = templateSrc + "<div class='editable'><%= article.content %></div>";
+
+			var template = _.template(templateSrc, {
+				article: article
+			});
+			this.$el.html(template);
+			douglas.actionPane.initialize();
+			douglas.actionPane.addButton("icon",{class:"octicon octicon-sync",title:"Refresh",text:""},"douglas.editArticleById(douglas.Article.id)");
+			douglas.actionPane.addButton("button",{class:"btn btn-primary btn-xs", title:"Save Article Contents",text:"Save"},"douglas.Article.saveArticleContent()");
+			douglas.actionPane.addButton("button",{class:"btn btn-success btn-xs", title:"Publish Article",text:"Publish"},"douglas.Article.publishArticle()");
+			douglas.actionPane.addButton("button",{class:"btn btn-warning btn-xs", title:"Unpublish Article",text:"Unpublish"},"douglas.Article.unpublishArticle()");
+			douglas.actionPane.addButton("button",{class:"btn btn-danger btn-xs", title:"Destroy Article",text:"Destroy"},"douglas.Article.destroyArticle");
+	    },
+	});
+})(Backbone, jQuery);
+
+ActionView = (function(Backbone, $){
+	return Backbone.View.extend({
+
+		el: "#actionsPane",
+		initialize: function(){
+			this.$el.empty();
+		},
+	    render: function(){
+	    },
+	    addButton: function(type,data,action){
+	    	if(type=="icon"){
+	    		var templateSrc = "<span class=\"actionButton <%= data.class %>\" style=\"\" title=\"<%= data.title %>\" onClick=\"<%= action %>\"><%= data.text %></span>";
+	    	}else{
+	    		var templateSrc = "<button type=\"button\" class=\"actionButton <%= data.class %>\" style=\"margin:5px;\" title=\"<%= data.title %>\" onClick=\"<%= action %>\"><%= data.text %></button>";
+	    	}
+	    	
+	    	var template = _.template(templateSrc, {
+				data:data,
+				action:action,
+			});
+			this.$el.append(template);
+	    },
+	});
+})(Backbone, jQuery);
+
 /**
  * Run Douglas
  */
 
 var douglas = new AppMain();
+_.extend(douglas, Backbone.Events); 
+douglas.on("click", function(msg) { alert("Triggered " + msg); });
 
 $(function(){
 	
@@ -378,7 +566,8 @@ $(function(){
 	douglas.articleTree = new ArticleTree();
 
 	douglas.articleTreeView = new ArticleTreeView();
+	douglas.actionPane = new ActionView();
 
-	douglas.initializeTinyMCE();
+	//douglas.initializeTinyMCE();
 
 });

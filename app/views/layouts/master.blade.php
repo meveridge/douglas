@@ -31,22 +31,30 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
-						<li {{ isset($activeLink) ? '' : 'class="active"' }}><a href="http://localhost/douglas/public/">Home</a></li>
+						<li {{ isset($activeLink) ? '' : 'class="active"' }}><a href="http://douglas/public/">Home</a></li>
 						<li class="dropdown {{ isset($activeLink) && $activeLink == "article" ? 'active' : '' }}">
 							<a href="" class="dropdown-toggle" data-toggle="dropdown">Articles <b class="caret"></b></a>
 							<ul class="dropdown-menu">
-								<li><a href="http://localhost/douglas/public/article/index/web">View</a></li>
-								<li><a href="http://localhost/douglas/public/article/create">New</a></li>
+								<li><a href="http://douglas/article/index/web">View</a></li>
+								<li><a href="http://douglas/article/create">New</a></li>
 								<li><a href="#">Copy</a></li>
 								<li><a href="#">Move</a></li>
 							</ul>
 						</li>
+<<<<<<< HEAD
 						 @if(!Auth::check())
                     <li>{{ HTML::link('users/login', 'Login') }}</li>
             @else
                     <li>{{ HTML::link('users/logout', 'Logout') }}</li>
             @endif
 						<!--<li>{{ HTML::link('users/login', 'Login') }}</li>-->
+=======
+						@if(!Auth::check())
+						  <li>{{ HTML::link('users/login', 'Login') }}</li>
+						@else
+              <li>{{ HTML::link('users/logout', 'logout') }}</li>
+            @endif
+>>>>>>> master
 						<!--<li><a href="#">Users</a></li>-->
 					</ul>
 				</div><!-- /.navbar-collapse -->
@@ -95,8 +103,8 @@
 		<div id="footer">
 			<div class="container-fluid">
 				<div class="row">
-					<div class="col-md-4 text-muted">Douglas for SugarCRM</div>
-					<div class="col-md-7 text-muted"></div>
+					<div class="col-md-2 text-muted">Douglas for SugarCRM</div>
+					<div class="col-md-9 text-muted" id="actionsPane"></div>
 					<div class="col-md-1 text-muted waitIndicator pull-right">
 						<span id="pageFooterWaitText" class="small hidden"></span>
 						<span id="pageFooterWaitIcon" class="glyphicon spin hidden"></span>
